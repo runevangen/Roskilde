@@ -25,16 +25,22 @@ const App = () => {
   const [textSize, setTextSize] = useState(1);
   const [favorites, setFavorites] = useState([]);
   const [meetHere, setMeetHere] = useState([]);
-  const [selectedDay, setSelectedDay] = useState('Wednesday 1st July');
+  const [selectedDay, setSelectedDay] = useState('Sunday 28th June');
   const [viewMode, setViewMode] = useState('schedule');
   const [adminPassword, setAdminPassword] = useState('');
   const [adminLogged, setAdminLogged] = useState(false);
   const [lineup, setLineup] = useState({});
-  const [friends] = useState(['Sirild', 'Alma']);
+  const [friends, setFriends] = useState(['Sirild', 'Alma']);
   const [version] = useState('2.0.0-beta');
   const [loading, setLoading] = useState(true);
+  const [editingFriends, setEditingFriends] = useState(false);
+  const [newFriend, setNewFriend] = useState('');
+  const [myPosition, setMyPosition] = useState('Orange Scene');
+  const [friendsPositions, setFriendsPositions] = useState({});
 
-  // Load lineup data from lineup.js
+  const arenaStages = ['Orange Scene', 'Arena', 'Lagune', 'The Yard', 'Stadion', 'Dancefloor', 'Skate', 'Re:Act', 'Grow', 'Cinema', 'Rehearsals of Belonging', 'Eos'];
+
+  // Load lineup data
   useEffect(() => {
     if (typeof ROSKILDE_LINEUP !== 'undefined') {
       setLineup(ROSKILDE_LINEUP);
@@ -42,24 +48,27 @@ const App = () => {
     setLoading(false);
   }, []);
 
-  // Load favorites from Netlify Blobs / localStorage
+  // Load user data from localStorage
   useEffect(() => {
-    const saved = localStorage.getItem(`roskilde-fav-${username}`);
-    if (saved) {
-      try {
-        setFavorites(JSON.parse(saved));
-      } catch (e) {
-        console.error('Failed to load favorites:', e);
-      }
+    if (username && isLoggedIn) {
+      const savedFavs = localStorage.getItem(`roskilde-fav-${username}`);
+      const savedPos = localStorage.getItem(`roskilde-pos-${username}`);
+      const savedFriends = localStorage.getItem(`roskilde-friends-${username}`);
+      
+      if (savedFavs) setFavorites(JSON.parse(savedFavs));
+      if (savedPos) setMyPosition(savedPos);
+      if (savedFriends) setFriends(JSON.parse(savedFriends));
     }
   }, [username, isLoggedIn]);
 
-  // Save favorites
+  // Save user data
   useEffect(() => {
     if (username && isLoggedIn) {
       localStorage.setItem(`roskilde-fav-${username}`, JSON.stringify(favorites));
+      localStorage.setItem(`roskilde-pos-${username}`, myPosition);
+      localStorage.setItem(`roskilde-friends-${username}`, JSON.stringify(friends));
     }
-  }, [favorites, username, isLoggedIn]);
+  }, [favorites, myPosition, friends, username, isLoggedIn]);
 
   const handleLogin = (e) => {
     e.preventDefault();
@@ -95,6 +104,25 @@ const App = () => {
     );
   };
 
+  const addFriend = (e) => {
+    e.preventDefault();
+    if (newFriend.trim() && !friends.includes(newFriend)) {
+      setFriends([...friends, newFriend]);
+      setNewFriend('');
+    }
+  };
+
+  const removeFriend = (friendName) => {
+    setFriends(friends.filter(f => f !== friendName));
+    const newPositions = { ...friendsPositions };
+    delete newPositions[friendName];
+    setFriendsPositions(newPositions);
+  };
+
+  const setFriendPosition = (friendName, stage) => {
+    setFriendsPositions({ ...friendsPositions, [friendName]: stage });
+  };
+
   const updateShow = (day, stage, showId, updates) => {
     setLineup(prev => ({
       ...prev,
@@ -123,7 +151,7 @@ const App = () => {
       ...prev,
       [day]: {
         ...prev[day],
-        [stage]: [...(prev[day][stage] || []), { id: newId, time: '20:00', artist: 'New Artist' }]
+        [stage]: [...(prev[day][stage] || []), { id: newId, time: '20:00', artist: 'New Artist', type: 'music' }]
       }
     }));
   };
@@ -136,7 +164,7 @@ const App = () => {
             ROSKILDE
           </h1>
           <p className={`text-center mb-8 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-            27.06 - 04.07 2026
+            28.06 - 04.07 2026
           </p>
           <form onSubmit={handleLogin}>
             <input
@@ -181,11 +209,10 @@ const App = () => {
         <div className="max-w-7xl mx-auto flex justify-between items-center flex-wrap gap-4">
           <div>
             <h1 className="text-2xl font-bold text-orange-500">ROSKILDE 2026</h1>
-            <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>27.06 - 04.07 • {username}</p>
+            <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>28.06 - 04.07 • {username} @ {myPosition}</p>
           </div>
 
           <div className="flex gap-2 items-center flex-wrap">
-            {/* Text Size */}
             <div className="flex gap-1">
               {[0.85, 1, 1.15].map((size, i) => (
                 <button
@@ -198,7 +225,6 @@ const App = () => {
               ))}
             </div>
 
-            {/* Theme */}
             <button
               onClick={() => setIsDark(!isDark)}
               className={`p-2 rounded ${isDark ? 'bg-gray-700' : 'bg-gray-200'}`}
@@ -207,7 +233,6 @@ const App = () => {
               {isDark ? '☀️' : '🌙'}
             </button>
 
-            {/* Logout */}
             <button
               onClick={() => {
                 setIsLoggedIn(false);
@@ -226,13 +251,13 @@ const App = () => {
       {/* View Tabs */}
       <div className={`${isDark ? 'bg-gray-800' : 'bg-white'} border-b border-gray-700 p-4 sticky top-16 z-40`}>
         <div className="max-w-7xl mx-auto flex gap-2 flex-wrap">
-          {['schedule', 'map', 'admin'].map(mode => (
+          {['schedule', 'friends', 'map', 'admin'].map(mode => (
             <button
               key={mode}
               onClick={() => setViewMode(mode)}
               className={`px-4 py-2 rounded font-bold capitalize ${viewMode === mode ? 'bg-orange-600 text-white' : isDark ? 'bg-gray-700' : 'bg-gray-200'}`}
             >
-              {mode === 'map' ? '🗺️ Arena' : mode === 'admin' ? '⚙️ Admin' : '📋 Schedule'}
+              {mode === 'map' ? '🗺️ Arena' : mode === 'friends' ? '👥 Friends' : mode === 'admin' ? '⚙️ Admin' : '📋 Schedule'}
             </button>
           ))}
         </div>
@@ -242,7 +267,6 @@ const App = () => {
       <main className="max-w-7xl mx-auto p-4">
         {viewMode === 'schedule' && (
           <>
-            {/* Day Selection */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-6">
               {days.map(day => (
                 <button
@@ -259,7 +283,6 @@ const App = () => {
               ))}
             </div>
 
-            {/* Schedule */}
             <div className="grid gap-6">
               {Object.entries(currentLineup).map(([stage, shows]) => (
                 <div key={stage} className={`${isDark ? 'bg-gray-800' : 'bg-white'} rounded-lg p-6 border-2 border-orange-600`}>
@@ -334,53 +357,154 @@ const App = () => {
               ))}
             </div>
 
-            {/* Info Cards */}
-            <div className="mt-8 grid md:grid-cols-2 gap-6">
-              <div className={`${isDark ? 'bg-gray-800' : 'bg-white'} rounded-lg p-6`}>
-                <h3 className="text-lg font-bold mb-3">👥 Vennegjengen</h3>
-                <div className="flex flex-wrap gap-2">
-                  {friends.map(friend => (
-                    <div key={friend} className="bg-blue-600 text-white px-3 py-1 rounded-full font-bold text-sm">
-                      {friend}
-                    </div>
-                  ))}
-                </div>
-              </div>
-
+            <div className="mt-8">
               <div className={`${isDark ? 'bg-gray-800' : 'bg-white'} rounded-lg p-6`}>
                 <h3 className="text-lg font-bold mb-3">★ Mine favoritter ({favorites.length})</h3>
                 <div className="flex flex-wrap gap-2">
-                  {favorites.slice(0, 6).map(fav => (
+                  {favorites.slice(0, 8).map(fav => (
                     <div key={fav} className="bg-orange-600 text-white px-3 py-1 rounded-full text-sm font-bold">
                       {fav}
                     </div>
                   ))}
-                  {favorites.length > 6 && (
-                    <div className={`px-3 py-1 rounded-full text-sm font-bold ${isDark ? 'bg-gray-700' : 'bg-gray-200'}`}>
-                      +{favorites.length - 6}
-                    </div>
-                  )}
                 </div>
               </div>
             </div>
           </>
         )}
 
-        {viewMode === 'map' && (
-          <div className={`${isDark ? 'bg-gray-800' : 'bg-white'} rounded-lg p-8`}>
-            <h2 className="text-2xl font-bold mb-6">🗺️ Arena Map</h2>
-            <div className={`${isDark ? 'bg-gray-700' : 'bg-gray-200'} p-8 rounded-lg text-center`}>
-              <p className="text-xl mb-4">Roskilde Festival 2026 Arena Layout</p>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-6">
-                {Object.keys(currentLineup).map(stage => (
-                  <div key={stage} className={`${isDark ? 'bg-gray-800' : 'bg-white'} p-4 rounded border-2 border-orange-600`}>
-                    <p className="font-bold text-orange-500">{stage}</p>
-                    <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                      {currentLineup[stage]?.length || 0} shows
-                    </p>
+        {viewMode === 'friends' && (
+          <div className="grid gap-6">
+            {/* My Position */}
+            <div className={`${isDark ? 'bg-gray-800' : 'bg-white'} rounded-lg p-6`}>
+              <h2 className="text-2xl font-bold mb-4">📍 Min posisjon</h2>
+              
+              <div className="mb-4">
+                <label className="block mb-2 font-bold">Hvor står/planlegger du å stå?</label>
+                <select
+                  value={myPosition}
+                  onChange={(e) => setMyPosition(e.target.value)}
+                  className={`w-full p-3 rounded border-2 ${isDark ? 'bg-gray-700 border-gray-600 text-white' : 'bg-gray-100 border-gray-300'}`}
+                >
+                  {arenaStages.map(stage => (
+                    <option key={stage} value={stage}>{stage}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className={`p-4 rounded ${isDark ? 'bg-gray-700' : 'bg-gray-100'} border-2 border-orange-600`}>
+                <p className="font-bold text-orange-500">{username}</p>
+                <p>📍 {myPosition}</p>
+              </div>
+            </div>
+
+            {/* Friends List */}
+            <div className={`${isDark ? 'bg-gray-800' : 'bg-white'} rounded-lg p-6`}>
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-2xl font-bold">👥 Vennegjengen ({friends.length})</h2>
+                <button
+                  onClick={() => setEditingFriends(!editingFriends)}
+                  className={`px-4 py-2 rounded font-bold ${
+                    editingFriends
+                      ? 'bg-red-600 hover:bg-red-700'
+                      : 'bg-blue-600 hover:bg-blue-700'
+                  } text-white`}
+                >
+                  {editingFriends ? '✕ Done' : '✏️ Edit'}
+                </button>
+              </div>
+
+              {editingFriends && (
+                <form onSubmit={addFriend} className="mb-6 pb-6 border-b border-gray-700">
+                  <div className="flex gap-2 mb-4">
+                    <input
+                      type="text"
+                      placeholder="Add new friend..."
+                      value={newFriend}
+                      onChange={(e) => setNewFriend(e.target.value)}
+                      className={`flex-1 p-3 rounded border-2 ${isDark ? 'bg-gray-700 border-gray-600 text-white' : 'bg-gray-100 border-gray-300'}`}
+                    />
+                    <button
+                      type="submit"
+                      className="px-4 py-3 bg-green-600 hover:bg-green-700 text-white rounded font-bold"
+                    >
+                      Add
+                    </button>
+                  </div>
+                </form>
+              )}
+
+              <div className="grid gap-4">
+                {friends.map(friend => (
+                  <div key={friend} className={`p-4 rounded border-2 ${isDark ? 'bg-gray-700 border-gray-600' : 'bg-gray-100 border-gray-300'}`}>
+                    <div className="flex justify-between items-center mb-3">
+                      <div>
+                        <p className="font-bold text-lg">{friend}</p>
+                        <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                          📍 {friendsPositions[friend] || '(No position set)'}
+                        </p>
+                      </div>
+                      {editingFriends && (
+                        <button
+                          onClick={() => removeFriend(friend)}
+                          className="px-3 py-1 bg-red-600 hover:bg-red-700 text-white rounded font-bold"
+                        >
+                          Remove
+                        </button>
+                      )}
+                    </div>
+
+                    {editingFriends && (
+                      <select
+                        value={friendsPositions[friend] || ''}
+                        onChange={(e) => setFriendPosition(friend, e.target.value)}
+                        className={`w-full p-2 rounded border ${isDark ? 'bg-gray-600 border-gray-500 text-white' : 'bg-white border-gray-300'} text-sm`}
+                      >
+                        <option value="">Set position...</option>
+                        {arenaStages.map(stage => (
+                          <option key={stage} value={stage}>{stage}</option>
+                        ))}
+                      </select>
+                    )}
                   </div>
                 ))}
               </div>
+            </div>
+          </div>
+        )}
+
+        {viewMode === 'map' && (
+          <div className={`${isDark ? 'bg-gray-800' : 'bg-white'} rounded-lg p-8`}>
+            <h2 className="text-2xl font-bold mb-6">🗺️ Arena Overview</h2>
+            
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+              {arenaStages.map(stage => {
+                const peopleHere = [username, ...friends].filter(p => 
+                  p === username ? myPosition === stage : friendsPositions[p] === stage
+                );
+                
+                return (
+                  <div 
+                    key={stage} 
+                    className={`p-4 rounded border-2 transition ${
+                      myPosition === stage
+                        ? 'bg-orange-600 border-orange-600 text-white'
+                        : isDark ? 'bg-gray-700 border-gray-600' : 'bg-gray-100 border-gray-300'
+                    }`}
+                  >
+                    <p className="font-bold">{stage}</p>
+                    {peopleHere.length > 0 && (
+                      <div className="mt-2 text-sm">
+                        <p className="font-bold">People here:</p>
+                        {peopleHere.map(person => (
+                          <p key={person} className={myPosition === stage && person === username ? 'font-bold' : ''}>
+                            {person === username ? `${person} (you)` : person}
+                          </p>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}
@@ -408,65 +532,11 @@ const App = () => {
             ) : (
               <div>
                 <h2 className="text-2xl font-bold mb-6">📊 Admin Control Panel</h2>
-
-                {/* Edit Lineup */}
-                <div className="mb-8">
-                  <h3 className="text-xl font-bold mb-4">Edit Lineup</h3>
-
-                  <div className="grid gap-6 max-h-96 overflow-y-auto">
-                    {Object.entries(lineup).map(([day, stages]) => (
-                      <div key={day} className={`${isDark ? 'bg-gray-700' : 'bg-gray-100'} p-4 rounded`}>
-                        <h4 className="font-bold text-orange-500 mb-3">{day}</h4>
-
-                        {Object.entries(stages).map(([stage, shows]) => (
-                          <div key={stage} className="ml-4 mb-4">
-                            <p className="font-bold mb-2">{stage}</p>
-
-                            {shows.map((show) => (
-                              <div key={show.id} className={`flex gap-2 mb-2 ${isDark ? 'bg-gray-600' : 'bg-white'} p-2 rounded text-sm`}>
-                                <input
-                                  type="text"
-                                  value={show.time}
-                                  onChange={(e) => updateShow(day, stage, show.id, { time: e.target.value })}
-                                  placeholder="Time"
-                                  className="w-20 p-1 rounded text-gray-900"
-                                />
-                                <input
-                                  type="text"
-                                  value={show.artist}
-                                  onChange={(e) => updateShow(day, stage, show.id, { artist: e.target.value })}
-                                  placeholder="Artist"
-                                  className="flex-1 p-1 rounded text-gray-900"
-                                />
-                                <button
-                                  onClick={() => deleteShow(day, stage, show.id)}
-                                  className="bg-red-600 text-white px-2 py-1 rounded"
-                                >
-                                  ✕
-                                </button>
-                              </div>
-                            ))}
-
-                            <button
-                              onClick={() => addShow(day, stage)}
-                              className="bg-green-600 text-white px-2 py-1 rounded text-sm mt-2"
-                            >
-                              + Add
-                            </button>
-                          </div>
-                        ))}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Stats */}
-                <div className={`${isDark ? 'bg-gray-700' : 'bg-gray-100'} p-4 rounded mb-4`}>
+                <div className={`${isDark ? 'bg-gray-700' : 'bg-gray-100'} p-4 rounded mb-6`}>
                   <p className="text-sm mb-2">📈 Total shows: {Object.values(lineup).flatMap(s => Object.values(s).flat()).length}</p>
-                  <p className="text-sm mb-2">🎭 Scenes: {Object.values(lineup).flatMap(s => Object.keys(s)).filter((v, i, a) => a.indexOf(v) === i).length}</p>
-                  <p className="text-sm">📅 Days: {Object.keys(lineup).length}</p>
+                  <p className="text-sm mb-2">🎭 Scenes: {arenaStages.length}</p>
+                  <p className="text-sm">📅 Days: {days.length}</p>
                 </div>
-
                 <button
                   onClick={() => setAdminLogged(false)}
                   className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
