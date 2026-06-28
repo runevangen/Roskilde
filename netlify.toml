@@ -1,19 +1,39 @@
+# Netlify-konfigurasjon for Tons of Rock flerbrukerversjon
+
 [build]
-  command = "echo 'Static deploy - Roskilde 2026'"
   publish = "."
-
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
-
-[env]
-  ADMIN_PASSWORD = "rock"
-  NODE_VERSION = "18.0.0"
-
-[context.production]
-  environment = { ADMIN_PASSWORD = "rock" }
+  functions = "netlify/functions"
 
 [functions]
-  directory = "netlify/functions"
   node_bundler = "esbuild"
+
+# Pene URL-er som alle peker til samme funksjon
+[[redirects]]
+  from = "/api/favorites"
+  to = "/.netlify/functions/favorites"
+  status = 200
+
+[[redirects]]
+  from = "/api/users"
+  to = "/.netlify/functions/favorites"
+  status = 200
+
+[[redirects]]
+  from = "/api/admin-delete"
+  to = "/.netlify/functions/favorites"
+  status = 200
+
+[[redirects]]
+  from = "/api/positions"
+  to = "/.netlify/functions/favorites"
+  status = 200
+
+[[redirects]]
+  from = "/api/position"
+  to = "/.netlify/functions/favorites"
+  status = 200
+
+[[redirects]]
+  from = "/api/lineup"
+  to = "/.netlify/functions/lineup"
+  status = 200
