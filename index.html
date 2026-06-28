@@ -1,568 +1,1668 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Roskilde 2026 Festival App</title>
-    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <style>
-        body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
+  <title>Roskilde 2026</title>
+
+  <!-- iOS fullscreen web app -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Roskilde">
+  <meta name="theme-color" content="#000000">
+
+  <!-- Home screen icon (embedded SVG, no external file needed) -->
+  <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' fill='%23000000'/%3E%3Ctext x='90' y='90' font-family='Georgia,serif' font-size='50' font-weight='bold' fill='%23fbbf24' text-anchor='middle' dominant-baseline='middle'%3EROSKI%3C/text%3E%3Ctext x='90' y='130' font-family='Georgia,serif' font-size='40' font-weight='bold' fill='%23fbbf24' text-anchor='middle'%3ELDE%3C/text%3E%3C/svg%3E">
+
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    /* Tekststørrelse: rot-skala styrer hele appen (alt bruker rem) */
+    html { font-size: 100%; }
+    html.size2 { font-size: 118%; }
+    html.size3 { font-size: 138%; }
+    body { background: #000; color: #fff; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; -webkit-tap-highlight-color: transparent; padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom); }
+    .header { background: linear-gradient(to bottom, #27272a, #000); border-bottom: 1px solid #27272a; padding: 3.5rem 1rem 2rem; }
+    .header h1 { font-size: 2.5rem; font-weight: 900; margin-bottom: 0.5rem; letter-spacing: -0.02em; }
+    .header p { color: #999; font-size: 0.9rem; }
+    .nav-container { background: #000; border-bottom: 1px solid #27272a; padding: 1rem; }
+    .nav-label { font-size: 0.75rem; text-transform: uppercase; color: #71717a; margin-bottom: 0.5rem; display: block; font-weight: 600; }
+    .button-group { display: flex; gap: 0.5rem; overflow-x: auto; padding-bottom: 0.5rem; }
+    /* Segmentert scene-kontroll: alle scener på én linje, deler bredden likt */
+    .segmented { display: flex; gap: 0.25rem; background: #18181b; border-radius: 0.5rem; padding: 0.25rem; }
+    .segmented button { flex: 1; padding: 0.5rem 0.25rem; font-size: 0.8rem; font-weight: 700; background: transparent; color: #a1a1aa; border-radius: 0.375rem; white-space: nowrap; min-width: 0; }
+    .segmented button.active { color: #fff; }
+    .segmented button.seg-all.active { background: #52525b; }
+    .segmented button.seg-scream.active { background: #dc2626; }
+    .segmented button.seg-vampire.active { background: #9333ea; }
+    .segmented button.seg-moonlight.active { background: #2563eb; }
+    .segmented button.seg-storm.active { background: #57534e; }
+    .fav-row { display: flex; gap: 0.5rem; margin-bottom: 0.5rem; }
+    .fav-row button { flex: 1; }
+    button { padding: 0.5rem 1rem; border: none; border-radius: 0.375rem; font-weight: 600; cursor: pointer; white-space: nowrap; transition: all 0.2s; font-size: 0.9rem; }
+    .btn-day { background: #27272a; color: #d4d4d8; }
+    .btn-day.active { background: #dc2626; color: #fff; }
+    .btn-day:hover { background: #3f3f46; }
+    .day-header { background: #27272a; padding: 1rem; margin: 1rem 0; border-radius: 0.5rem; text-align: center; position: relative; }
+    .day-header h2 { font-size: 1.5rem; font-weight: 700; margin-bottom: 0.25rem; }
+    .day-header p { color: #a1a1aa; font-size: 0.9rem; }
+    .day-nav-btn { position: absolute; top: 50%; transform: translateY(-50%); background: #52525b; color: #fff; border: none; border-radius: 0.375rem; padding: 0.5rem 0.75rem; cursor: pointer; font-size: 1.25rem; transition: all 0.2s; }
+    .day-nav-btn:hover { background: #71717a; }
+    .day-nav-btn.prev { left: 1rem; }
+    .day-nav-btn.next { right: 1rem; }
+    .btn-stage, .btn-genre { background: #27272a; color: #a1a1aa; font-size: 0.85rem; }
+    .btn-stage.active, .btn-genre.active { background: #52525b; color: #fff; }
+    .btn-stage:hover, .btn-genre:hover { background: #3f3f46; }
+    .content { padding: 1.5rem; max-width: 56rem; margin: 0 auto; }
+    .no-results { text-align: center; padding: 3rem 1rem; color: #71717a; }
+    .performance { border: 2px solid; border-radius: 0.5rem; padding: 1rem; margin-bottom: 0.75rem; transition: all 0.2s; background: #18181b; }
+    .performance:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5); }
+    .performance-info { flex: 1; min-width: 0; }
+    .perf-top-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 0.75rem; }
+    .band-line { display: flex; align-items: flex-start; gap: 0.6rem; flex: 1; min-width: 0; }
+    .band-line .band-text { flex: 1; min-width: 0; }
+    .performance-band { font-size: 1.4rem; font-weight: 800; margin-bottom: 0.25rem; overflow-wrap: break-word; color: #fff; line-height: 1.15; }
+    .action-row { display: flex; justify-content: flex-end; gap: 0.4rem; margin-top: 0.75rem; }
+    .performance-genres { font-size: 0.75rem; color: #a1a1aa; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 500; }
+    .performance-meta { display: flex; flex-wrap: wrap; gap: 1rem; font-size: 0.9rem; align-items: center; }
+    .stage-badge { font-weight: 800; font-size: 1.05rem; padding: 0.3rem 0.7rem 0.3rem 0.5rem; border-radius: 0.375rem; background: #000; color: #fff; border-left: 4px solid; display: inline-block; }
+    /* Kompakt scene-tag på kortet: liten farget firkant med initial */
+    .stage-tag { font-weight: 800; font-size: 0.8rem; padding: 0.2rem 0.5rem; border-radius: 0.3rem; color: #fff; display: inline-flex; align-items: center; gap: 0.3rem; }
+    .stage-tag.scream { background: #dc2626; }
+    .stage-tag.vampire { background: #9333ea; }
+    .stage-tag.moonlight { background: #2563eb; }
+    .stage-tag.storm { background: #57534e; }
+    .time-badge { color: #d4d4d8; font-weight: 600; }
+    .date-badge { color: #71717a; }
+    .star-btn { background: transparent; border: none; cursor: pointer; font-size: 1.5rem; line-height: 1.1; padding: 0; transition: transform 0.15s; flex-shrink: 0; color: #52525b; }
+    .star-btn:hover { transform: scale(1.2); }
+    .star-btn.active { color: #fbbf24; }
+    .btn-fav { background: #27272a; color: #fbbf24; }
+    .btn-fav.active { background: #fbbf24; color: #000; }
+    .fav-count { font-size: 0.75rem; opacity: 0.7; }
+    /* Brukernavn-banner øverst */
+    .user-bar { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; padding: 0.6rem 1rem; background: #18181b; border-bottom: 1px solid #27272a; font-size: 0.85rem; }
+    .user-bar .who { color: #d4d4d8; }
+    .user-bar .who strong { color: #fbbf24; }
+    .user-bar .who .local-tag { color: #71717a; font-size: 0.75rem; }
+    .user-bar button { background: #27272a; color: #a1a1aa; border: none; padding: 0.35rem 0.7rem; border-radius: 0.375rem; font-size: 0.8rem; font-weight: 600; cursor: pointer; }
+    .user-bar button:hover { background: #3f3f46; color: #fff; }
+    /* Modal-skjema */
+    .form-field { margin-bottom: 1rem; }
+    .form-field label { display: block; font-size: 0.85rem; color: #a1a1aa; margin-bottom: 0.4rem; }
+    .form-field input { width: 100%; padding: 0.6rem 0.75rem; background: #000; border: 1px solid #3f3f46; border-radius: 0.375rem; color: #fff; font-size: 1rem; }
+    .form-field input:focus { outline: none; border-color: #fbbf24; }
+    .modal-btn { display: block; width: 100%; padding: 0.7rem; border-radius: 0.375rem; font-weight: 700; cursor: pointer; border: none; margin-top: 0.5rem; font-size: 0.95rem; }
+    .modal-btn.primary { background: #fbbf24; color: #000; }
+    .modal-btn.primary:hover { background: #fcd34d; }
+    .modal-btn.secondary { background: #27272a; color: #d4d4d8; }
+    .modal-btn.secondary:hover { background: #3f3f46; }
+    .modal-btn.ghost { background: transparent; color: #71717a; border: 1px solid #3f3f46; }
+    .modal-btn.ghost:hover { color: #a1a1aa; border-color: #52525b; }
+    .login-divider { display: flex; align-items: center; gap: 0.6rem; margin: 1rem 0; color: #52525b; font-size: 0.78rem; }
+    .login-divider::before, .login-divider::after { content: ''; flex: 1; height: 1px; background: #27272a; }
+    .modal-note { font-size: 0.8rem; color: #71717a; margin-top: 0.75rem; line-height: 1.5; }
+    .modal-status { font-size: 0.85rem; padding: 0.6rem; border-radius: 0.375rem; margin: 0.5rem 0; }
+    .modal-status.warn { background: rgba(251,191,36,0.1); color: #fbbf24; border: 1px solid #fbbf24; }
+    .modal-status.info { background: rgba(96,165,250,0.1); color: #60a5fa; }
+    .viewing-banner { background: rgba(96,165,250,0.15); border: 1px solid #3b82f6; border-radius: 0.5rem; padding: 0.75rem 1rem; margin: 1rem 0; display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; }
+    .viewing-banner .vb-text { color: #93c5fd; font-size: 0.9rem; }
+    .viewing-banner .vb-text strong { color: #fff; }
+    .viewing-banner button { background: #2563eb; color: #fff; border: none; padding: 0.4rem 0.8rem; border-radius: 0.375rem; font-size: 0.8rem; font-weight: 600; cursor: pointer; }
+    /* Venne-rad på kort (Variant A: stjerne+navn+knapper øverst, navn-piller under) */
+    .friends-bar { margin-top: 0.9rem; padding-top: 0.75rem; border-top: 1px solid #27272a; }
+    .fav-label { font-size: 0.82rem; color: #fbbf24; font-weight: 700; letter-spacing: 0.01em; display: block; margin-bottom: 0.5rem; }
+    .nametags { display: flex; gap: 0.4rem; flex-wrap: wrap; align-items: center; }
+    .nametag { display: inline-flex; align-items: center; gap: 0.35rem; background: #27272a; border-radius: 1rem; padding: 0.22rem 0.6rem 0.22rem 0.28rem; font-size: 0.8rem; font-weight: 600; cursor: pointer; }
+    .nametag:hover { background: #3f3f46; }
+    .nametag .dot { width: 1.3rem; height: 1.3rem; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 0.58rem; font-weight: 800; color: #fff; }
+    .dot.c0 { background: #dc2626; } .dot.c1 { background: #2563eb; } .dot.c2 { background: #16a34a; }
+    .dot.c3 { background: #9333ea; } .dot.c4 { background: #ea580c; } .dot.c5 { background: #0891b2; }
+    .total-count { font-size: 0.8rem; color: #71717a; font-weight: 600; }
+    .compare-inline { background: transparent; color: #a1a1aa; border: 1px solid #52525b; border-radius: 0.375rem; padding: 0.35rem 0.7rem; font-size: 0.8rem; cursor: pointer; font-weight: 600; white-space: nowrap; flex-shrink: 0; }
+    .compare-inline:hover { border-color: #a1a1aa; color: #fff; }
+    .btn-row { display: flex; gap: 0.4rem; flex-shrink: 0; }
+    .icon-btn { border: none; border-radius: 0.375rem; padding: 0.35rem 0.6rem; font-size: 0.78rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 0.3rem; white-space: nowrap; }
+    .icon-btn.spotify { background: #27272a; color: #1db954; border: 1px solid #1db954; }
+    .icon-btn.spotify:hover { background: #1db954; color: #000; }
+    .icon-btn.lfm { background: #27272a; color: #1db954; border: 1px solid #1db954; }
+    .icon-btn.lfm:hover { background: #1db954; color: #000; }
+    .icon-btn.pos { background: #27272a; color: #fbbf24; border: 1px solid #fbbf24; }
+    .icon-btn.pos:hover { background: #fbbf24; color: #000; }
+    /* Arena-kart (tribune-posisjon) */
+    .arena { background: radial-gradient(ellipse at 50% 0%, #1c1c22 0%, #0a0a0c 80%); border-radius: 0.6rem; padding: 0.8rem 0.6rem 1rem; }
+    .arena-stage { background: linear-gradient(to bottom, #fbbf24, #b8860b); color: #000; text-align: center; font-weight: 900; letter-spacing: 0.15em; font-size: 0.85rem; padding: 0.55rem; border-radius: 0.5rem 0.5rem 1.5rem 1.5rem; box-shadow: 0 0 30px rgba(251,191,36,0.4); margin: 0 auto 0.2rem; width: 60%; }
+    .arena-glow { height: 0.5rem; background: radial-gradient(ellipse at 50% 0%, rgba(251,191,36,0.25), transparent 70%); margin-bottom: 0.5rem; }
+    .zone-side-label { text-align: center; font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.12em; color: #52525b; margin-bottom: 0.25rem; font-weight: 700; }
+    .zone-row { display: flex; gap: 0.4rem; justify-content: center; margin: 0 auto 0.4rem; }
+    .zone-row.foran { width: 74%; } .zone-row.midten { width: 88%; } .zone-row.bak { width: 100%; }
+    .zone { flex: 1; background: rgba(255,255,255,0.03); border: 1px solid #3f3f46; border-radius: 0.4rem; min-height: 4rem; padding: 0.3rem; cursor: pointer; display: flex; flex-wrap: wrap; gap: 0.25rem; align-content: flex-start; justify-content: center; transition: all 0.15s; position: relative; }
+    .zone:hover { border-color: #71717a; background: rgba(255,255,255,0.06); }
+    .zone.mine { border-color: #fbbf24; background: rgba(251,191,36,0.1); box-shadow: inset 0 0 12px rgba(251,191,36,0.15); }
+    .zone-tag { position: absolute; top: 3px; left: 5px; font-size: 0.5rem; font-weight: 700; color: #52525b; letter-spacing: 0.05em; }
+    .zone.mine .zone-tag { color: #fbbf24; }
+    .bub { width: 1.7rem; height: 1.7rem; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 0.58rem; font-weight: 800; color: #fff; position: relative; cursor: pointer; margin-top: 0.5rem; }
+    .bub.seek::after { content: '✨'; position: absolute; top: -0.55rem; right: -0.45rem; font-size: 0.7rem; }
+    .bub.c0 { background: #dc2626; } .bub.c1 { background: #2563eb; } .bub.c2 { background: #16a34a; }
+    .bub.c3 { background: #9333ea; } .bub.c4 { background: #ea580c; } .bub.c5 { background: #0891b2; }
+    .bub.me { background: #fbbf24; color: #000; box-shadow: 0 0 0 2px #18181b, 0 0 0 3.5px #fbbf24; }
+    .meet-toggle { margin-top: 1rem; display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; background: #27272a; border-radius: 0.5rem; padding: 0.7rem 0.9rem; }
+    .meet-toggle .mt-text { font-size: 0.85rem; }
+    .meet-toggle .mt-text small { display: block; color: #71717a; font-size: 0.72rem; margin-top: 0.15rem; }
+    .meet-btn { border: 1px solid #52525b; background: transparent; color: #a1a1aa; border-radius: 0.4rem; padding: 0.4rem 0.8rem; font-weight: 700; font-size: 0.82rem; cursor: pointer; white-space: nowrap; }
+    .meet-btn.on { background: #fbbf24; color: #000; border-color: #fbbf24; }
+    .arena-legend { font-size: 0.72rem; color: #52525b; margin-top: 0.9rem; line-height: 1.5; }
+    .concert-desc { color: #a1a1aa; font-size: 0.85rem; line-height: 1.5; margin: 0.4rem 0 1.1rem; padding-bottom: 1.1rem; border-bottom: 1px solid #27272a; }
+    /* Admin-lenke i footer */
+    .footer .admin-link { font-size: 0.7rem; color: #3f3f46; margin-top: 0.75rem; cursor: pointer; display: inline-block; }
+    .footer .admin-link:hover { color: #71717a; }
+    /* Venne/admin-lister i modal */
+    .pick-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem; background: #27272a; border-radius: 0.375rem; margin-bottom: 0.5rem; cursor: pointer; }
+    .pick-item:hover { background: #3f3f46; }
+    .pick-item input { width: 1.1rem; height: 1.1rem; accent-color: #fbbf24; flex-shrink: 0; }
+    .pick-item .pname { font-weight: 600; flex: 1; }
+    .pick-item .pmeta { font-size: 0.75rem; color: #71717a; }
+    .modal-select { width: 100%; padding: 0.6rem; background: #000; border: 1px solid #3f3f46; border-radius: 0.375rem; color: #fff; font-size: 1rem; }
+    .admin-bar { display: flex; gap: 0.5rem; margin-top: 1rem; }
+    .admin-bar button { flex: 1; }
+    .warn-box { background: rgba(220,38,38,0.15); border: 1px solid #dc2626; color: #fca5a5; padding: 0.6rem; border-radius: 0.375rem; font-size: 0.85rem; margin-bottom: 1rem; }
+    /* Admin: rediger program */
+    .lineup-admin-section { margin-top: 1.5rem; padding-top: 1.2rem; border-top: 1px solid #27272a; }
+    .lineup-admin-section h4 { font-size: 0.95rem; margin-bottom: 0.5rem; color: #fbbf24; }
+    .lineup-search { width: 100%; background: #27272a; border: 1px solid #3f3f46; border-radius: 0.4rem; padding: 0.55rem 0.7rem; color: #fff; font-size: 0.85rem; margin-bottom: 0.7rem; }
+    .lineup-search::placeholder { color: #71717a; }
+    .band-row { display: flex; align-items: center; gap: 0.6rem; background: #27272a; border-radius: 0.5rem; padding: 0.6rem 0.75rem; margin-bottom: 0.5rem; }
+    .band-row .stage-dot { width: 0.6rem; height: 0.6rem; border-radius: 50%; flex-shrink: 0; }
+    .band-row .binfo { flex: 1; min-width: 0; }
+    .band-row .bname { font-weight: 700; font-size: 0.9rem; color: #fff; }
+    .band-row .bmeta { font-size: 0.73rem; color: #a1a1aa; margin-top: 0.1rem; }
+    .row-btn { background: #3f3f46; border: none; border-radius: 0.35rem; width: 1.9rem; height: 1.9rem; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 0.85rem; flex-shrink: 0; }
+    .row-btn.del:hover { background: #7f1d1d; }
+    .row-btn.edit:hover { background: #52525b; }
+    .dot-scream { background: #dc2626; } .dot-vampire { background: #9333ea; }
+    .dot-moonlight { background: #2563eb; } .dot-storm { background: #57534e; }
+    .add-band-btn { width: 100%; background: #27272a; border: 1px dashed #52525b; color: #a1a1aa; border-radius: 0.5rem; padding: 0.65rem; font-weight: 700; font-size: 0.83rem; cursor: pointer; }
+    .add-band-btn:hover { border-color: #71717a; color: #fff; }
+    .lineup-edit-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: flex; align-items: flex-start; justify-content: center; padding: 1rem; z-index: 200; overflow-y: auto; }
+    .lineup-edit-modal { background: #18181b; border: 1px solid #27272a; border-radius: 0.6rem; max-width: 420px; width: 100%; padding: 1.3rem; margin-top: 1.5rem; }
+    .lineup-edit-modal h3 { font-size: 1.05rem; margin-bottom: 1rem; }
+    .lf-field { margin-bottom: 0.85rem; }
+    .lf-field label { display: block; font-size: 0.76rem; color: #a1a1aa; margin-bottom: 0.3rem; font-weight: 600; }
+    .lf-field input, .lf-field select { width: 100%; background: #27272a; border: 1px solid #3f3f46; border-radius: 0.4rem; padding: 0.55rem 0.65rem; color: #fff; font-size: 0.85rem; }
+    .lf-row { display: flex; gap: 0.6rem; }
+    .lf-row .lf-field { flex: 1; }
+    .cap-warn { background: rgba(234,88,12,0.15); border: 1px solid #ea580c; color: #fdba74; border-radius: 0.5rem; padding: 0.8rem 1rem; font-size: 0.85rem; line-height: 1.5; margin-bottom: 0.5rem; }
+    .cap-warn strong { color: #fff; }
+    .performance-right { display: flex; gap: 0.5rem; align-items: flex-start; flex-shrink: 0; flex-col; }
+    .time-display { font-size: 1.5rem; font-weight: 700; color: #52525b; min-width: 60px; text-align: right; }
+    .compare-btn { background: transparent; color: #52525b; border: 1px solid #52525b; border-radius: 0.375rem; padding: 0.4rem 0.6rem; transition: all 0.2s; font-size: 0.9rem; }
+    .compare-btn:hover { color: #e4e4e7; border-color: #e4e4e7; background: #27272a; }
+    .stage-scream { border-color: #ef4444; }
+    .stage-scream .stage-badge { border-left-color: #ef4444; }
+    .stage-vampire { border-color: #a855f7; }
+    .stage-vampire .stage-badge { border-left-color: #a855f7; }
+    .stage-moonlight { border-color: #3b82f6; }
+    .stage-moonlight .stage-badge { border-left-color: #3b82f6; }
+    .stage-storm { border-color: #a8a29e; }
+    .stage-storm .stage-badge { border-left-color: #a8a29e; }
+    .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.9); display: flex; align-items: center; justify-content: center; z-index: 100; padding: 1rem; }
+    .modal { background: #18181b; border: 1px solid #27272a; border-radius: 0.5rem; max-width: 600px; width: 100%; max-height: 80vh; overflow-y: auto; padding: 2rem; position: relative; }
+    .modal-close { position: absolute; top: 1rem; right: 1rem; background: #27272a; border: none; color: #fff; width: 2rem; height: 2rem; border-radius: 0.25rem; cursor: pointer; font-size: 1.5rem; display: flex; align-items: center; justify-content: center; }
+    .modal-close:hover { background: #3f3f46; }
+    .modal h2 { font-size: 1.5rem; margin-bottom: 0.5rem; }
+    .modal-subtitle { color: #71717a; font-size: 0.9rem; margin-bottom: 1.5rem; text-transform: uppercase; letter-spacing: 0.05em; }
+    .similar-section h3 { font-size: 1.1rem; margin: 1.5rem 0 1rem; color: #e4e4e7; border-bottom: 1px solid #27272a; padding-bottom: 0.5rem; }
+    .similar-band { padding: 0.75rem; background: #27272a; border-radius: 0.375rem; margin-bottom: 0.5rem; cursor: pointer; transition: all 0.2s; }
+    .similar-band:hover { background: #3f3f46; transform: translateX(4px); }
+    .similar-band-name { font-weight: 600; color: #fff; }
+    .similar-band-genres { font-size: 0.75rem; color: #71717a; margin-top: 0.25rem; }
+    .similar-band-time { font-size: 0.75rem; color: #52525b; margin-top: 0.25rem; }
+    .tracks-section { display: flex; flex-direction: column; gap: 0.75rem; }
+    .track-item { padding: 1rem; background: #27272a; border-radius: 0.375rem; text-decoration: none; color: #fff; transition: all 0.2s; border: 1px solid #3f3f46; display: block; }
+    .track-item:hover { background: #3f3f46; border-color: #52525b; transform: translateX(4px); }
+    .track-name { font-weight: 600; margin-bottom: 0.5rem; }
+    .track-link { font-size: 0.8rem; color: #60a5fa; }
+    .track-item:hover .track-link { color: #93c5fd; }
+    .footer { border-top: 1px solid #27272a; padding: 1.5rem; text-align: center; color: #71717a; font-size: 0.9rem; margin-top: 2rem; }
+    .footer .version { font-size: 0.75rem; color: #52525b; margin-top: 0.5rem; font-family: ui-monospace, 'SF Mono', Menlo, monospace; cursor: pointer; display: inline-block; transition: color 0.2s; }
+    .footer .version:hover { color: #a1a1aa; }
+    .footer .version strong { color: #71717a; }
+    .changelog-entry { margin-bottom: 1.25rem; }
+    .changelog-entry h4 { font-size: 0.95rem; color: #fff; margin-bottom: 0.4rem; font-family: ui-monospace, 'SF Mono', Menlo, monospace; }
+    .changelog-entry h4 .cl-date { color: #71717a; font-weight: 400; font-size: 0.8rem; margin-left: 0.5rem; }
+    .changelog-entry ul { list-style: none; padding: 0; }
+    .changelog-entry li { color: #d4d4d8; font-size: 0.85rem; padding: 0.2rem 0 0.2rem 1rem; position: relative; }
+    .changelog-entry li::before { content: '▸'; position: absolute; left: 0; color: #52525b; }
+    .changelog-entry.current h4 { color: #fbbf24; }
+    .hidden { display: none; }
+    @media (max-width: 640px) {
+      .header h1 { font-size: 1.875rem; }
+    }
+
+    /* ===================== LYST TEMA: VARM SAND ===================== */
+    body.light { background: #f5f0e6; color: #3f2d10; }
+    body.light .header { background: linear-gradient(to bottom, #e8dcc4, #f5f0e6); border-bottom-color: #e0d3b5; }
+    body.light .header h1 { color: #3f2d10; }
+    body.light .header p { color: #9c8861; }
+    body.light .nav-container { background: #f5f0e6; border-bottom-color: #e0d3b5; }
+    body.light .nav-label { color: #7c6a4d; }
+    body.light .user-bar { background: #efe7d5; border-bottom-color: #e0d3b5; }
+    body.light .user-bar .who { color: #5c4a2a; }
+    body.light .user-bar button { background: #e0d3b5; color: #5c4a2a; }
+    body.light .user-bar button:hover { background: #d6c9ad; color: #3f2d10; }
+    body.light .btn-day, body.light .btn-stage { background: #efe7d5; color: #7c6a4d; }
+    body.light .btn-day.active { background: #c2410c; color: #fff; }
+    body.light .btn-day:hover { background: #e0d3b5; }
+    body.light .segmented { background: #e8dcc4; }
+    body.light .segmented button { color: #7c6a4d; }
+    body.light .segmented button.active { color: #fff; }
+    body.light .btn-fav { background: #e0d3b5; color: #b45309; }
+    body.light .btn-fav.active { background: #ea580c; color: #fff; }
+    /* Kort */
+    body.light .performance { background: #fffdf8; box-shadow: 0 1px 3px rgba(120,80,20,0.12); }
+    body.light .performance:hover { box-shadow: 0 6px 16px rgba(120,80,20,0.18); }
+    body.light .performance-band { color: #3f2d10; }
+    body.light .performance-genres { color: #9c8861; }
+    body.light .time-badge { color: #5c4a2a; }
+    body.light .date-badge { color: #9c8861; }
+    body.light .star-btn { color: #d6c9ad; }
+    body.light .star-btn.active { color: #ea580c; }
+    body.light .icon-btn.lfm, body.light .icon-btn.spotify { background: #fffdf8; color: #15803d; border-color: #15803d; }
+    body.light .icon-btn.lfm:hover, body.light .icon-btn.spotify:hover { background: #15803d; color: #fff; }
+    body.light .icon-btn.pos { background: #fffdf8; color: #c2410c; border-color: #ea580c; }
+    body.light .icon-btn.pos:hover { background: #ea580c; color: #fff; }
+    body.light .friends-bar { border-top-color: #e8dcc4; }
+    body.light .fav-label { color: #c2410c; }
+    body.light .nametag { background: #f0e8d6; color: #3f2d10; }
+    body.light .total-count { color: #9c8861; }
+    body.light .no-results { color: #9c8861; }
+    body.light .day-header { background: #efe7d5; }
+    body.light .day-header h2 { color: #3f2d10; }
+    body.light .day-header p { color: #9c8861; }
+    body.light .day-nav-btn { background: #e0d3b5; color: #5c4a2a; }
+    body.light .footer { border-top-color: #e0d3b5; color: #9c8861; }
+    body.light .footer .version { color: #b5a888; }
+    body.light .footer .admin-link { color: #cabfa3; }
+    /* Modal */
+    body.light .modal { background: #fffdf8; border-color: #e0d3b5; }
+    body.light .modal h2 { color: #3f2d10; }
+    body.light .modal-subtitle, body.light .modal .sub { color: #9c8861; }
+    body.light .modal-content { color: #5c4a2a; }
+    body.light .modal-close { background: #e8dcc4; color: #3f2d10; }
+    body.light .track-item { background: #f0e8d6; border-color: #e0d3b5; }
+    body.light .track-name { color: #3f2d10; }
+    body.light .form-field input, body.light .modal-select { background: #fff; border-color: #d6c9ad; color: #3f2d10; }
+    body.light .pick-item { background: #f0e8d6; }
+    body.light .pick-item:hover { background: #e8dcc4; }
+    body.light .pick-item .pname { color: #3f2d10; }
+    body.light .changelog-entry h4 { color: #3f2d10; }
+    body.light .changelog-entry li { color: #5c4a2a; }
+    body.light .modal-btn.secondary { background: #e8dcc4; color: #5c4a2a; }
+    body.light .modal-btn.ghost { color: #9c8861; border-color: #d6c9ad; }
+    body.light .login-divider { color: #b5a888; }
+    body.light .login-divider::before, body.light .login-divider::after { background: #e0d3b5; }
+    /* Arena i lyst tema */
+    body.light .arena { background: #ebe2cf; }
+    body.light .arena-stage { background: linear-gradient(to bottom, #ea580c, #9a3412); color: #fff; box-shadow: 0 0 30px rgba(234,88,12,0.3); }
+    body.light .zone-side-label { color: #9c8861; }
+    body.light .zone { background: #fffdf8; border-color: #d6c9ad; }
+    body.light .zone:hover { border-color: #b5a888; background: #fff; }
+    body.light .zone.mine { border-color: #ea580c; background: #fde6d3; box-shadow: inset 0 0 12px rgba(234,88,12,0.12); }
+    body.light .zone-tag { color: #b5a888; }
+    body.light .zone.mine .zone-tag { color: #c2410c; }
+    body.light .bub.me { background: #ea580c; color: #fff; box-shadow: 0 0 0 2px #fffdf8, 0 0 0 3.5px #ea580c; }
+    body.light .meet-toggle { background: #f0e8d6; }
+    body.light .meet-toggle .mt-text small { color: #9c8861; }
+    body.light .arena-legend { color: #9c8861; }
+    body.light .concert-desc { color: #7c6a4d; border-bottom-color: #e8dcc4; }
+    /* Tema-bryter */
+    .theme-toggle { background: transparent; border: none; cursor: pointer; font-size: 1.1rem; padding: 0.35rem 0.5rem; border-radius: 0.375rem; }
+    body.light .theme-toggle:hover { background: #e0d3b5; }
+    body:not(.light) .theme-toggle:hover { background: #27272a; }
+    /* Tekststørrelse-kontroll (AAA) */
+    .header-controls { position: absolute; top: 1rem; right: 1rem; display: flex; align-items: center; gap: 0.5rem; }
+    .size-control { display: flex; gap: 0.2rem; }
+    .size-control button { background: #27272a; color: #a1a1aa; border: 1px solid #3f3f46; border-radius: 0.35rem; cursor: pointer; font-weight: 800; width: 2rem; height: 2rem; display: flex; align-items: center; justify-content: center; padding: 0; line-height: 1; }
+    .size-control button.s1 { font-size: 0.8rem; }
+    .size-control button.s2 { font-size: 1rem; }
+    .size-control button.s3 { font-size: 1.2rem; }
+    .size-control button.active { background: #fbbf24; color: #000; border-color: #fbbf24; }
+    body.light .size-control button { background: #e0d3b5; color: #5c4a2a; border-color: #d6c9ad; }
+    body.light .size-control button.active { background: #ea580c; color: #fff; border-color: #ea580c; }
+  </style>
 </head>
 <body>
-<div id="root"></div>
-
-<script type="text/babel">
-const { useState, useEffect } = React;
-
-const App = () => {
-  const [username, setUsername] = useState('');
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [isDark, setIsDark] = useState(true);
-  const [textSize, setTextSize] = useState(1);
-  const [favorites, setFavorites] = useState([]);
-  const [meetHere, setMeetHere] = useState([]);
-  const [selectedDay, setSelectedDay] = useState('Sunday 28th June');
-  const [viewMode, setViewMode] = useState('schedule');
-  const [adminPassword, setAdminPassword] = useState('');
-  const [adminLogged, setAdminLogged] = useState(false);
-  const [lineup, setLineup] = useState({});
-  const [friends, setFriends] = useState(['Sirild', 'Alma']);
-  const [version] = useState('2.0.0-beta');
-  const [loading, setLoading] = useState(true);
-  const [editingFriends, setEditingFriends] = useState(false);
-  const [newFriend, setNewFriend] = useState('');
-  const [myPosition, setMyPosition] = useState('Orange Scene');
-  const [friendsPositions, setFriendsPositions] = useState({});
-
-  const arenaStages = ['Orange Scene', 'Arena', 'Lagune', 'The Yard', 'Stadion', 'Dancefloor', 'Skate', 'Re:Act', 'Grow', 'Cinema', 'Rehearsals of Belonging', 'Eos'];
-
-  // Load lineup data
-  useEffect(() => {
-    if (typeof ROSKILDE_LINEUP !== 'undefined') {
-      setLineup(ROSKILDE_LINEUP);
-    }
-    setLoading(false);
-  }, []);
-
-  // Load user data from localStorage
-  useEffect(() => {
-    if (username && isLoggedIn) {
-      const savedFavs = localStorage.getItem(`roskilde-fav-${username}`);
-      const savedPos = localStorage.getItem(`roskilde-pos-${username}`);
-      const savedFriends = localStorage.getItem(`roskilde-friends-${username}`);
-      
-      if (savedFavs) setFavorites(JSON.parse(savedFavs));
-      if (savedPos) setMyPosition(savedPos);
-      if (savedFriends) setFriends(JSON.parse(savedFriends));
-    }
-  }, [username, isLoggedIn]);
-
-  // Save user data
-  useEffect(() => {
-    if (username && isLoggedIn) {
-      localStorage.setItem(`roskilde-fav-${username}`, JSON.stringify(favorites));
-      localStorage.setItem(`roskilde-pos-${username}`, myPosition);
-      localStorage.setItem(`roskilde-friends-${username}`, JSON.stringify(friends));
-    }
-  }, [favorites, myPosition, friends, username, isLoggedIn]);
-
-  const handleLogin = (e) => {
-    e.preventDefault();
-    if (username.trim()) {
-      setIsLoggedIn(true);
-    }
-  };
-
-  const handleAdminLogin = (e) => {
-    e.preventDefault();
-    if (adminPassword === 'rock') {
-      setAdminLogged(true);
-      setAdminPassword('');
-    } else {
-      alert('Wrong password');
-      setAdminPassword('');
-    }
-  };
-
-  const toggleFavorite = (artist) => {
-    setFavorites(prev =>
-      prev.includes(artist)
-        ? prev.filter(a => a !== artist)
-        : [...prev, artist]
-    );
-  };
-
-  const toggleMeetHere = (artist) => {
-    setMeetHere(prev =>
-      prev.includes(artist)
-        ? prev.filter(a => a !== artist)
-        : [...prev, artist]
-    );
-  };
-
-  const addFriend = (e) => {
-    e.preventDefault();
-    if (newFriend.trim() && !friends.includes(newFriend)) {
-      setFriends([...friends, newFriend]);
-      setNewFriend('');
-    }
-  };
-
-  const removeFriend = (friendName) => {
-    setFriends(friends.filter(f => f !== friendName));
-    const newPositions = { ...friendsPositions };
-    delete newPositions[friendName];
-    setFriendsPositions(newPositions);
-  };
-
-  const setFriendPosition = (friendName, stage) => {
-    setFriendsPositions({ ...friendsPositions, [friendName]: stage });
-  };
-
-  const updateShow = (day, stage, showId, updates) => {
-    setLineup(prev => ({
-      ...prev,
-      [day]: {
-        ...prev[day],
-        [stage]: prev[day][stage].map(show =>
-          show.id === showId ? { ...show, ...updates } : show
-        )
-      }
-    }));
-  };
-
-  const deleteShow = (day, stage, showId) => {
-    setLineup(prev => ({
-      ...prev,
-      [day]: {
-        ...prev[day],
-        [stage]: prev[day][stage].filter(show => show.id !== showId)
-      }
-    }));
-  };
-
-  const addShow = (day, stage) => {
-    const newId = Date.now().toString();
-    setLineup(prev => ({
-      ...prev,
-      [day]: {
-        ...prev[day],
-        [stage]: [...(prev[day][stage] || []), { id: newId, time: '20:00', artist: 'New Artist', type: 'music' }]
-      }
-    }));
-  };
-
-  if (!isLoggedIn) {
-    return (
-      <div className={`min-h-screen flex items-center justify-center ${isDark ? 'bg-gray-900' : 'bg-gray-100'}`}>
-        <div className={`p-8 rounded-lg ${isDark ? 'bg-gray-800' : 'bg-white'} shadow-xl max-w-md w-full mx-4`}>
-          <h1 className={`text-4xl font-bold mb-2 text-center ${isDark ? 'text-orange-400' : 'text-orange-600'}`}>
-            ROSKILDE
-          </h1>
-          <p className={`text-center mb-8 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-            28.06 - 04.07 2026
-          </p>
-          <form onSubmit={handleLogin}>
-            <input
-              type="text"
-              placeholder="Enter your name..."
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              className={`w-full p-3 rounded border-2 ${isDark ? 'bg-gray-700 border-gray-600 text-white' : 'bg-gray-100 border-gray-300'} mb-4`}
-              style={{ fontSize: `${16 * textSize}px` }}
-              autoFocus
-            />
-            <button
-              type="submit"
-              disabled={!username.trim()}
-              className="w-full bg-orange-600 hover:bg-orange-700 disabled:bg-gray-500 text-white font-bold py-2 px-4 rounded"
-            >
-              Enter Festival
-            </button>
-          </form>
-        </div>
+  <div class="header" style="position:relative;">
+    <h1>ROSKILDE</h1>
+    <p>June 24–27, 2026 • Oslo</p>
+    <div class="header-controls">
+      <div class="size-control" id="sizeControl">
+        <button class="s1" data-size="1" title="Normal tekst">A</button>
+        <button class="s2" data-size="2" title="Stor tekst">A</button>
+        <button class="s3" data-size="3" title="Størst tekst">A</button>
       </div>
-    );
-  }
-
-  if (loading) {
-    return (
-      <div className={`min-h-screen flex items-center justify-center ${isDark ? 'bg-gray-900' : 'bg-gray-100'}`}>
-        <div className={`p-8 text-center ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-          <p>Loading festival data...</p>
-        </div>
-      </div>
-    );
-  }
-
-  const days = Object.keys(lineup);
-  const currentLineup = lineup[selectedDay] || {};
-
-  return (
-    <div className={`min-h-screen ${isDark ? 'bg-gray-900 text-white' : 'bg-gray-50 text-gray-900'}`} style={{ fontSize: `${14 * textSize}px` }}>
-      {/* Header */}
-      <header className={`${isDark ? 'bg-gray-800' : 'bg-white'} border-b-2 border-orange-600 p-4 sticky top-0 z-50`}>
-        <div className="max-w-7xl mx-auto flex justify-between items-center flex-wrap gap-4">
-          <div>
-            <h1 className="text-2xl font-bold text-orange-500">ROSKILDE 2026</h1>
-            <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>28.06 - 04.07 • {username} @ {myPosition}</p>
-          </div>
-
-          <div className="flex gap-2 items-center flex-wrap">
-            <div className="flex gap-1">
-              {[0.85, 1, 1.15].map((size, i) => (
-                <button
-                  key={i}
-                  onClick={() => setTextSize(size)}
-                  className={`w-8 h-8 rounded font-bold text-xs ${textSize === size ? 'bg-orange-600 text-white' : isDark ? 'bg-gray-700' : 'bg-gray-200'}`}
-                >
-                  {['S', 'M', 'L'][i]}
-                </button>
-              ))}
-            </div>
-
-            <button
-              onClick={() => setIsDark(!isDark)}
-              className={`p-2 rounded ${isDark ? 'bg-gray-700' : 'bg-gray-200'}`}
-              title="Toggle theme"
-            >
-              {isDark ? '☀️' : '🌙'}
-            </button>
-
-            <button
-              onClick={() => {
-                setIsLoggedIn(false);
-                setUsername('');
-                setAdminLogged(false);
-              }}
-              className="p-2 rounded bg-red-600 hover:bg-red-700 text-white"
-              title="Logout"
-            >
-              ⬅️
-            </button>
-          </div>
-        </div>
-      </header>
-
-      {/* View Tabs */}
-      <div className={`${isDark ? 'bg-gray-800' : 'bg-white'} border-b border-gray-700 p-4 sticky top-16 z-40`}>
-        <div className="max-w-7xl mx-auto flex gap-2 flex-wrap">
-          {['schedule', 'friends', 'map', 'admin'].map(mode => (
-            <button
-              key={mode}
-              onClick={() => setViewMode(mode)}
-              className={`px-4 py-2 rounded font-bold capitalize ${viewMode === mode ? 'bg-orange-600 text-white' : isDark ? 'bg-gray-700' : 'bg-gray-200'}`}
-            >
-              {mode === 'map' ? '🗺️ Arena' : mode === 'friends' ? '👥 Friends' : mode === 'admin' ? '⚙️ Admin' : '📋 Schedule'}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto p-4">
-        {viewMode === 'schedule' && (
-          <>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-6">
-              {days.map(day => (
-                <button
-                  key={day}
-                  onClick={() => setSelectedDay(day)}
-                  className={`p-3 rounded font-bold transition ${
-                    selectedDay === day
-                      ? 'bg-orange-600 text-white'
-                      : isDark ? 'bg-gray-800 hover:bg-gray-700' : 'bg-white hover:bg-gray-100'
-                  }`}
-                >
-                  {day.split(' ')[0]}
-                </button>
-              ))}
-            </div>
-
-            <div className="grid gap-6">
-              {Object.entries(currentLineup).map(([stage, shows]) => (
-                <div key={stage} className={`${isDark ? 'bg-gray-800' : 'bg-white'} rounded-lg p-6 border-2 border-orange-600`}>
-                  <h2 className="text-xl font-bold text-orange-500 mb-4">{stage}</h2>
-
-                  <div className="grid gap-3">
-                    {shows.map((show) => (
-                      <div
-                        key={show.id}
-                        className={`p-3 rounded border-l-4 transition ${
-                          show.type !== 'music'
-                            ? 'border-blue-500'
-                            : 'border-orange-500'
-                        } ${
-                          favorites.includes(show.artist)
-                            ? isDark ? 'bg-orange-900 bg-opacity-50' : 'bg-orange-100'
-                            : isDark ? 'bg-gray-700' : 'bg-gray-100'
-                        }`}
-                      >
-                        <div className="flex justify-between items-center flex-wrap gap-2">
-                          <div className="flex-1">
-                            <div className="font-bold text-lg flex items-center gap-2">
-                              {show.artist}
-                              {show.type === 'art' && <span title="Art & Activism">🎨</span>}
-                              {show.type === 'activity' && <span title="Activity">🎪</span>}
-                              {show.type === 'film' && <span title="Film">🎬</span>}
-                            </div>
-                            <div className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                              {show.time} • {stage}
-                              {show.type !== 'music' && (
-                                <span className={`ml-2 px-2 py-1 rounded text-xs font-bold ${
-                                  show.type === 'art' ? 'bg-purple-600 text-white' :
-                                  show.type === 'activity' ? 'bg-green-600 text-white' :
-                                  'bg-blue-600 text-white'
-                                }`}>
-                                  {show.type === 'art' ? 'ART' : show.type === 'activity' ? 'ACTIVITY' : 'FILM'}
-                                </span>
-                              )}
-                            </div>
-                          </div>
-
-                          <div className="flex gap-2">
-                            <button
-                              onClick={() => toggleFavorite(show.artist)}
-                              className={`px-3 py-1 rounded font-bold transition ${
-                                favorites.includes(show.artist)
-                                  ? 'bg-orange-600 text-white'
-                                  : isDark ? 'bg-gray-600' : 'bg-gray-300'
-                              }`}
-                              title="Add to favorites"
-                            >
-                              ★
-                            </button>
-
-                            <button
-                              onClick={() => toggleMeetHere(show.artist)}
-                              className={`px-3 py-1 rounded font-bold transition ${
-                                meetHere.includes(show.artist)
-                                  ? 'bg-green-600 text-white'
-                                  : isDark ? 'bg-gray-600' : 'bg-gray-300'
-                              }`}
-                              title="Møt meg her"
-                            >
-                              📍
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <div className="mt-8">
-              <div className={`${isDark ? 'bg-gray-800' : 'bg-white'} rounded-lg p-6`}>
-                <h3 className="text-lg font-bold mb-3">★ Mine favoritter ({favorites.length})</h3>
-                <div className="flex flex-wrap gap-2">
-                  {favorites.slice(0, 8).map(fav => (
-                    <div key={fav} className="bg-orange-600 text-white px-3 py-1 rounded-full text-sm font-bold">
-                      {fav}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </>
-        )}
-
-        {viewMode === 'friends' && (
-          <div className="grid gap-6">
-            {/* My Position */}
-            <div className={`${isDark ? 'bg-gray-800' : 'bg-white'} rounded-lg p-6`}>
-              <h2 className="text-2xl font-bold mb-4">📍 Min posisjon</h2>
-              
-              <div className="mb-4">
-                <label className="block mb-2 font-bold">Hvor står/planlegger du å stå?</label>
-                <select
-                  value={myPosition}
-                  onChange={(e) => setMyPosition(e.target.value)}
-                  className={`w-full p-3 rounded border-2 ${isDark ? 'bg-gray-700 border-gray-600 text-white' : 'bg-gray-100 border-gray-300'}`}
-                >
-                  {arenaStages.map(stage => (
-                    <option key={stage} value={stage}>{stage}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div className={`p-4 rounded ${isDark ? 'bg-gray-700' : 'bg-gray-100'} border-2 border-orange-600`}>
-                <p className="font-bold text-orange-500">{username}</p>
-                <p>📍 {myPosition}</p>
-              </div>
-            </div>
-
-            {/* Friends List */}
-            <div className={`${isDark ? 'bg-gray-800' : 'bg-white'} rounded-lg p-6`}>
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-2xl font-bold">👥 Vennegjengen ({friends.length})</h2>
-                <button
-                  onClick={() => setEditingFriends(!editingFriends)}
-                  className={`px-4 py-2 rounded font-bold ${
-                    editingFriends
-                      ? 'bg-red-600 hover:bg-red-700'
-                      : 'bg-blue-600 hover:bg-blue-700'
-                  } text-white`}
-                >
-                  {editingFriends ? '✕ Done' : '✏️ Edit'}
-                </button>
-              </div>
-
-              {editingFriends && (
-                <form onSubmit={addFriend} className="mb-6 pb-6 border-b border-gray-700">
-                  <div className="flex gap-2 mb-4">
-                    <input
-                      type="text"
-                      placeholder="Add new friend..."
-                      value={newFriend}
-                      onChange={(e) => setNewFriend(e.target.value)}
-                      className={`flex-1 p-3 rounded border-2 ${isDark ? 'bg-gray-700 border-gray-600 text-white' : 'bg-gray-100 border-gray-300'}`}
-                    />
-                    <button
-                      type="submit"
-                      className="px-4 py-3 bg-green-600 hover:bg-green-700 text-white rounded font-bold"
-                    >
-                      Add
-                    </button>
-                  </div>
-                </form>
-              )}
-
-              <div className="grid gap-4">
-                {friends.map(friend => (
-                  <div key={friend} className={`p-4 rounded border-2 ${isDark ? 'bg-gray-700 border-gray-600' : 'bg-gray-100 border-gray-300'}`}>
-                    <div className="flex justify-between items-center mb-3">
-                      <div>
-                        <p className="font-bold text-lg">{friend}</p>
-                        <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                          📍 {friendsPositions[friend] || '(No position set)'}
-                        </p>
-                      </div>
-                      {editingFriends && (
-                        <button
-                          onClick={() => removeFriend(friend)}
-                          className="px-3 py-1 bg-red-600 hover:bg-red-700 text-white rounded font-bold"
-                        >
-                          Remove
-                        </button>
-                      )}
-                    </div>
-
-                    {editingFriends && (
-                      <select
-                        value={friendsPositions[friend] || ''}
-                        onChange={(e) => setFriendPosition(friend, e.target.value)}
-                        className={`w-full p-2 rounded border ${isDark ? 'bg-gray-600 border-gray-500 text-white' : 'bg-white border-gray-300'} text-sm`}
-                      >
-                        <option value="">Set position...</option>
-                        {arenaStages.map(stage => (
-                          <option key={stage} value={stage}>{stage}</option>
-                        ))}
-                      </select>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {viewMode === 'map' && (
-          <div className={`${isDark ? 'bg-gray-800' : 'bg-white'} rounded-lg p-8`}>
-            <h2 className="text-2xl font-bold mb-6">🗺️ Arena Overview</h2>
-            
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-              {arenaStages.map(stage => {
-                const peopleHere = [username, ...friends].filter(p => 
-                  p === username ? myPosition === stage : friendsPositions[p] === stage
-                );
-                
-                return (
-                  <div 
-                    key={stage} 
-                    className={`p-4 rounded border-2 transition ${
-                      myPosition === stage
-                        ? 'bg-orange-600 border-orange-600 text-white'
-                        : isDark ? 'bg-gray-700 border-gray-600' : 'bg-gray-100 border-gray-300'
-                    }`}
-                  >
-                    <p className="font-bold">{stage}</p>
-                    {peopleHere.length > 0 && (
-                      <div className="mt-2 text-sm">
-                        <p className="font-bold">People here:</p>
-                        {peopleHere.map(person => (
-                          <p key={person} className={myPosition === stage && person === username ? 'font-bold' : ''}>
-                            {person === username ? `${person} (you)` : person}
-                          </p>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
-
-        {viewMode === 'admin' && (
-          <div className={`${isDark ? 'bg-gray-800' : 'bg-white'} rounded-lg p-6`}>
-            {!adminLogged ? (
-              <form onSubmit={handleAdminLogin} className="max-w-md">
-                <h2 className="text-2xl font-bold mb-4">⚙️ Admin Panel</h2>
-                <input
-                  type="password"
-                  placeholder="Admin password"
-                  value={adminPassword}
-                  onChange={(e) => setAdminPassword(e.target.value)}
-                  className={`w-full p-3 rounded border-2 ${isDark ? 'bg-gray-700 border-gray-600 text-white' : 'bg-gray-100 border-gray-300'} mb-4`}
-                  autoFocus
-                />
-                <button
-                  type="submit"
-                  className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
-                >
-                  Login
-                </button>
-              </form>
-            ) : (
-              <div>
-                <h2 className="text-2xl font-bold mb-6">📊 Admin Control Panel</h2>
-                <div className={`${isDark ? 'bg-gray-700' : 'bg-gray-100'} p-4 rounded mb-6`}>
-                  <p className="text-sm mb-2">📈 Total shows: {Object.values(lineup).flatMap(s => Object.values(s).flat()).length}</p>
-                  <p className="text-sm mb-2">🎭 Scenes: {arenaStages.length}</p>
-                  <p className="text-sm">📅 Days: {days.length}</p>
-                </div>
-                <button
-                  onClick={() => setAdminLogged(false)}
-                  className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
-                >
-                  Logout
-                </button>
-              </div>
-            )}
-          </div>
-        )}
-      </main>
-
-      {/* Footer */}
-      <footer className={`${isDark ? 'bg-gray-800' : 'bg-white'} border-t border-gray-700 p-4 mt-12 text-center`}>
-        <p className={isDark ? 'text-gray-400' : 'text-gray-600'}>
-          Roskilde 2026 App • v{version}
-        </p>
-      </footer>
+      <button class="theme-toggle" id="themeToggle" title="Bytt mellom mørkt og lyst tema">🌙</button>
     </div>
-  );
-};
+  </div>
 
-ReactDOM.createRoot(document.getElementById('root')).render(<App />);
-</script>
+  <div class="user-bar" id="userBar"></div>
 
-<!-- Load lineup data -->
-<script src="lineup.js"></script>
+  <div id="dayNav" class="nav-container">
+    <span class="nav-label">Day</span>
+    <div class="button-group" id="dayButtons"></div>
+  </div>
+
+  <div id="stageNav" class="nav-container">
+    <div id="stageButtons"></div>
+  </div>
+
+  <div class="content" id="content"></div>
+
+  <div class="footer">
+    Tons of Rock Festival Schedule 2026
+    <div class="version" id="versionInfo"></div>
+    <div class="admin-link" id="adminLink">· admin ·</div>
+  </div>
+
+  <script>
+    // ============================================================
+    // VERSJON — legg til ny oppføring øverst i CHANGELOG ved hver innsjekking
+    // ===== TEMA (mørkt / lyst sand) — lagres lokalt =====
+    function applyTheme(theme) {
+      const light = theme === 'light';
+      document.body.classList.toggle('light', light);
+      const btn = document.getElementById('themeToggle');
+      if (btn) btn.textContent = light ? '☀️' : '🌙';
+    }
+    function loadTheme() {
+      try { return localStorage.getItem('tor_theme') || 'dark'; } catch (e) { return 'dark'; }
+    }
+    function toggleTheme() {
+      const next = document.body.classList.contains('light') ? 'dark' : 'light';
+      try { localStorage.setItem('tor_theme', next); } catch (e) {}
+      applyTheme(next);
+    }
+    applyTheme(loadTheme());
+
+    // ===== TEKSTSTØRRELSE (1/2/3) — lagres lokalt =====
+    function applySize(level) {
+      document.documentElement.classList.remove('size2', 'size3');
+      if (level === 2) document.documentElement.classList.add('size2');
+      if (level === 3) document.documentElement.classList.add('size3');
+      document.querySelectorAll('#sizeControl button').forEach(b => {
+        b.classList.toggle('active', parseInt(b.dataset.size) === level);
+      });
+    }
+    function loadSize() {
+      try { return parseInt(localStorage.getItem('tor_textsize')) || 1; } catch (e) { return 1; }
+    }
+    function setSize(level) {
+      try { localStorage.setItem('tor_textsize', level); } catch (e) {}
+      applySize(level);
+    }
+    applySize(loadSize());
+
+    const APP_VERSION = 'v2.9.0-beta';
+    const APP_BUILD = '2026-06-26';
+    const CHANGELOG = [
+      { version: 'v2.9.0-beta', date: '2026-06-26', changes: [
+        'NYTT: admin kan redigere band, tid, scene, sjanger og type direkte i appen',
+        'Programmet lagres nå i skyen i stedet for i koden — endringer er live umiddelbart',
+        'Legg til / slett oppføringer + «Tilbakestill til original» som sikkerhetsnett',
+        'Søk i bandlisten i admin-panelet'
+      ]},
+      { version: 'v2.8.2-beta', date: '2026-06-26', changes: [
+        'Lyst tema: dag-boksen over lista er nå lys (var mørk)'
+      ]},
+      { version: 'v2.8.1-beta', date: '2026-06-26', changes: [
+        'Fikset bandnavn som brøt loddrett ved stor tekst',
+        'Knapper (📍 LFM ♪) flyttet til egen rad så navnet får full bredde'
+      ]},
+      { version: 'v2.8.0-beta', date: '2026-06-26', changes: [
+        'Tekststørrelse-bryter (A/A/A) — Normal, Stor, Størst',
+        'Knapper og trykkflater vokser også, ikke bare teksten',
+        'Valget huskes til neste gang'
+      ]},
+      { version: 'v2.7.1-beta', date: '2026-06-26', changes: [
+        'Lyst tema: rettet dag-knapper og markering av valgt dag',
+        'Aktiv scene/favoritt-knapp vises nå riktig i lyst tema'
+      ]},
+      { version: 'v2.7.0-beta', date: '2026-06-26', changes: [
+        'Lyst «varm sand»-tema for bedre lesbarhet i festivalsola',
+        'Tema-bryter (☀️/🌙) øverst til høyre — valget huskes'
+      ]},
+      { version: 'v2.6.1-beta', date: '2026-06-26', changes: [
+        'Lineup: The Hellacopters erstatter Tom Morello (fredag, avlyst)',
+        'Fikset lagring av tribune-posisjon ved rask flytting',
+        'Tydelig feilmelding hvis posisjon ikke lagres',
+        '«Møt meg her» ber deg velge sone først'
+      ]},
+      { version: 'v2.6.0-beta', date: '2026-06-25', changes: [
+        'NYTT: tribune-kart — marker hvor du står på hver konsert (📍-knapp)',
+        'Se hvor vennegjengen står på et arena-kart sett ovenfra',
+        '«Møt meg her ✨» for å vise at du søker selskap (kun synlig i kartet)',
+        'Live-lagring — flytt deg ved å trykke en ny sone'
+      ]},
+      { version: 'v2.5.0-beta', date: '2026-06-25', changes: [
+        'Tilfeldig overskrift over venne-pillene — ny hver gang du åpner appen',
+        '12 varianter (Folket har talt, Gjengen som stiller, Rock on! m.fl.)'
+      ]},
+      { version: 'v2.4.1-beta', date: '2026-06-25', changes: [
+        'Joan Jett and the Blackhearts ? erstatter Yungblud (fredag, avlyst)',
+        '«?» markerer at nøyaktig spilletid ikke er bekreftet ennå'
+      ]},
+      { version: 'v2.4.0-beta', date: '2026-06-24', changes: [
+        'Stjerne flyttet til venstre for bandnavnet',
+        'LFM/Spotify-knapper øverst til høyre, begge i rolig mørk stil',
+        'Fjernet stort klokkeslett (tiden står fortsatt i meta-linja)',
+        'Fikset «+N andre» som feilaktig talte deg selv'
+      ]},
+      { version: 'v2.3.0-beta', date: '2026-06-24', changes: [
+        '«Favoritter til:» nederst med fulle navn (fornavn-piller)',
+        'Over 10 venner vises som «+N andre»',
+        'Logg ut-knapp i brukerbaren'
+      ]},
+      { version: 'v2.2.0-beta', date: '2026-06-24', changes: [
+        'Appen husker deg fra sist — automatisk pålogging',
+        'Egen «Opprett ny bruker» med duplikatsjekk',
+        'Under 15 brukere er alle automatisk venner (advarsel ved nr. 16)',
+        'Venner vises PÅ som standard',
+        'LFM-knapp (Last.fm) ved siden av Spotify-knapp'
+      ]},
+      { version: 'v2.1.0-beta', date: '2026-06-24', changes: [
+        'Venner fra liste, «Favoritter til:» med initialer + totaltall',
+        'Admin-panel i footer for å rydde brukere'
+      ]},
+      { version: 'v2.0.0-beta', date: '2026-06-24', changes: [
+        'FLERBRUKER: favoritter i skyen under brukernavn, lokal fallback'
+      ]},
+      { version: 'v1.7.0', date: '2026-06-24', changes: [
+        'Ryddet OCR-feil i bandnavn mot offisiell lineup',
+        'Alle 72 navn verifisert mot festivalens program'
+      ]},
+      { version: 'v1.6.0', date: '2026-06-24', changes: [
+        'Klikkbart versjonsnummer med full endringslogg',
+        'Rettet bandnavn: Angel → Angell, med riktig sjanger'
+      ]},
+      { version: 'v1.5.0', date: '2026-06-24', changes: [
+        'Rettet rådatafeil: Evanscene → Grandson på Moonlight torsdag',
+        'Storm Stage: skiller nå band fra standup/scene (annenhver)',
+        'Rettet OCR-feil: Die Spitz, Imminence, Dumdum Boys, Mørk Medisin m.fl.'
+      ]},
+      { version: 'v1.4.0', date: '2026-06-24', changes: [
+        'Segmentert scene-filter — alle scener på én linje uten scrolling',
+        'Kompakt scene-tag på kortene'
+      ]},
+      { version: 'v1.3.0', date: '2026-06-24', changes: [
+        'Favoritter: stjernemerk band og se dem på tvers av alle dager',
+        'Favoritter lagres lokalt og overlever omstart'
+      ]},
+      { version: 'v1.2.0', date: '2026-06-24', changes: [
+        'Compare bruker nå Last.fm for ekte lignende artister med match-prosent',
+        'Norge–Frankrike merket som fotball-event (ikke band)'
+      ]},
+      { version: 'v1.1.0', date: '2026-06-24', changes: [
+        'Lagt til iOS hjemskjerm-støtte (fullskjerm-app)',
+        'Verifiserte topplåter med Spotify-lenker'
+      ]},
+      { version: 'v1.0.0', date: '2026-06-24', changes: [
+        'Første versjon: program for alle fire dager, scene-filter, sjangre'
+      ]}
+    ];
+    // ============================================================
+
+    // Sjanger per band — bygges nå dynamisk fra programmet (se rebuildScheduleFromFlat)
+    // i stedet for en hardkodet liste, slik at admin kan redigere sjanger per oppføring.
+    let bandGenres = {};
+
+    const popularTracks = {
+      'Iron Maiden': ['The Trooper', 'Run to the Hills', 'Hallowed Be Thy Name', 'Fear of the Dark', 'The Number of the Beast'],
+      'Anthrax': ['Madhouse', 'Indians', 'Caught in a Mosh', 'Antisocial', 'Got the Time'],
+      'Alice Cooper': ['School\'s Out', 'Poison', 'No More Mr. Nice Guy', 'I\'m Eighteen', 'Feed My Frankenstein'],
+      'Apocalyptica': ['Nothing Else Matters', 'Hall of the Mountain King', 'I Don\'t Care', 'Path', 'Seek & Destroy'],
+      'Behemoth': ['O Father O Satan O Sun!', 'Conquer All', 'Ov Fire and the Void', 'Bartzabel', 'Chant for Eschaton 2000'],
+      'A Perfect Circle': ['Judith', 'The Outsider', 'The Hollow', '3 Libras', 'Weak and Powerless'],
+      'D-A-D': ['Sleeping My Day Away', 'Grow or Pay', 'Bad Craziness', 'Laugh \'n\' a 1/2', 'Jihad'],
+      'The Offspring': ['You\'re Gonna Go Far, Kid', 'The Kids Aren\'t Alright', 'Pretty Fly (For a White Guy)', 'Self Esteem', 'Come Out and Play'],
+      'Babymetal': ['Gimme Chocolate!!', 'KARATE', 'PA PA YA!!', 'Megitsune', 'Road of Resistance'],
+      'Suicidal Tendencies': ['Institutionalized', 'You Can\'t Bring Me Down', 'War Inside My Head', 'Pledge Your Allegiance', 'Possessed to Skate'],
+      'Black Label Society': ['Stillborn', 'In This River', 'Bleed for Me', 'Suicide Messiah', 'Concrete Jungle'],
+      'Leprous': ['The Sky Is Red', 'Slave', 'Below', 'From the Flame', 'The Price'],
+      'Avatar': ['Hail the Apocalypse', 'Smells Like a Freakshow', 'The Eagle Has Landed', 'Bloody Angel', 'A Statue of the King'],
+      'Queensrÿche': ['Silent Lucidity', 'Eyes of a Stranger', 'Jet City Woman', 'Empire', 'Queen of the Reich'],
+      'Cavalera': ['Roots Bloody Roots', 'Refuse/Resist', 'Territory', 'Attitude', 'Troops of Doom'],
+      'Rival Sons': ['Pressure and Time', 'Open My Eyes', 'Do Your Worst', 'Electric Man', 'Keep On Swinging'],
+      'Pain': ['Shut Your Mouth', 'End of the Line', 'Same Old Song', 'Dancing With the Dead', 'Designed to Piss You Off'],
+      'Accept': ['Balls to the Wall', 'Fast as a Shark', 'Metal Heart', 'Princess of the Dawn', 'Restless and Wild'],
+      'Sepultura': ['Roots Bloody Roots', 'Refuse/Resist', 'Territory', 'Arise', 'Ratamahatta'],
+      'Elder': ['Sanctuary', 'Dead Roots Stirring', 'Lore', 'Compendium', 'The Falling Veil'],
+      'The Hives': ['Hate to Say I Told You So', 'Tick Tick Boom', 'Walk Idiot Walk', 'Main Offender', 'Come On!'],
+      'Eivør': ['Trøllabundin', 'Falling Free', 'Tròdlabùndin', 'Salt', 'Mín móðir'],
+      'The Hellacopters': ['By the Grace of God', 'I Am Just a Lonesome Highway', 'No Song Unheard', 'Carry Me Home', 'Gotta Get Some Action'],
+      'Bring Me The Horizon': ['Can You Feel My Heart', 'Throne', 'Drown', 'Doomed', 'Kingslayer'],
+      'Dumdum Boys': ['Splitter Pine', 'Enkeltbillett', 'Vredens Dag', 'Marsboern', 'Tyven, tyven'],
+      'Raga Rockers': ['Noen å hate', 'Hun er fri', 'Fanden, Fanden', 'Terrorister', 'Vil ha deg'],
+      'Joan Jett and the Blackhearts ?': ['I Love Rock n Roll', 'Bad Reputation', 'I Hate Myself for Loving You', 'Crimson and Clover', 'Cherry Bomb'],
+      'Mayhem': ['Freezing Moon', 'De Mysteriis Dom Sathanas', 'Pure Fucking Armageddon', 'Funeral Fog', 'Deathcrush'],
+      'Audrey Horne': ['Pretty Hate Machine', 'Redemption Blues', 'This Is War', 'Out of the City', 'Light Your Way'],
+      'Limp Bizkit': ['Break Stuff', 'Rollin\'', 'My Way', 'Take a Look Around', 'Nookie'],
+      'Possessed': ['Death Metal', 'The Exorcist', 'Pentagram', 'Burning in Hell', 'Fallen Angel'],
+      'Gatecreeper': ['Sweltering Madness', 'Boiled Over', 'Puncture Wounds', 'Emptiness', 'Sterilized'],
+      'Blood Red Throne': ['Soulseller', 'Affiliated With the Suffering', 'Mary Whispers of Death', 'Deatholy', 'Dödsskrik'],
+      'Death To All': ['Pull the Plug', 'Crystal Mountain', 'Lack of Comprehension', 'Spirit Crusher', 'Symbolic'],
+      'Blood Incantation': ['The Giza Power Plant', 'Inner Paths', 'Hidden Species', 'Slave Species of the Gods', 'Awakening'],
+      'Kublai Khan TX': ['Antpile', 'Self-Harm', 'B.A.U.', 'The Hammer', 'No Kin'],
+      'The Funeral Portrait': ['Holy Water', 'Voodoo Doll', 'Alibi', 'Suffocate City', 'Bones'],
+      'Black Debbath': ['Naar Tyfusen Herjet', 'Storeslem i Slekta', 'Pizza & Pils', 'Lro', 'Hard Rock Ferie'],
+      'The Carburetors': ['Hard Rock', 'Rock'],
+      'The Baboon Show': ['People You Should Know', 'Don\'t Give a Damn About You', 'Radio Rebelde', 'My Plan', 'Channel by Channel'],
+      'PaleFace Swiss': ['Please End Me', 'Lifeline', 'Hatred', 'Wenn Die Sonne Erlischt', 'Gates of Zion'],
+      'Yonaka': ['Rockstar', 'Seize the Power', 'Punch Bag', 'Creature', 'Ordinary'],
+      'The Warning': ['Choke', 'Evolve', 'MORE', 'Money', 'Hell You Call a Dream'],
+      'Imminence': ['The Sickness', 'Heaven Shall Burn', 'Paralyzed', 'Ophidian', 'Come Hell or High Water'],
+      'Dogstar': ['Everything Turns Around', 'Glimmer', 'Breach', 'How the Story Ends', 'Sleep']
+    };
+
+    // Programmet hentes nå fra /api/lineup (Netlify Blobs) ved oppstart,
+    // slik at admin kan redigere band/tid/scene/sjanger uten ny kode-deploy.
+    // `schedule` bygges opp av rebuildScheduleFromFlat() når dataen er hentet.
+    let schedule = [];
+
+    // Dag -> dato-tekst. Selve dagene (4 faste festivaldager) er IKKE
+    // redigerbare i admin denne runden — bare hvilke oppføringer som ligger på dem.
+    const DAY_DATES = { Wednesday: 'June 24', Thursday: 'June 25', Friday: 'June 26', Saturday: 'June 27' };
+    const DAY_ORDER = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+    // Reserve-kopi av programmet (samme data som ligger i Netlify Blobs ved
+    // første oppstart). Brukes BARE hvis /api/lineup ikke svarer, så appen
+    // aldri viser en blank liste pga. nettverksfeil.
+    const FALLBACK_LINEUP = [{"id":"p001","band":"Black Debbath","day":"Wednesday","stage":"Scream Stage","start":"14:00","end":"14:50","genre":["Heavy Metal","Doom Metal"],"type":"band"},{"id":"p002","band":"Trivium","day":"Wednesday","stage":"Scream Stage","start":"15:55","end":"16:55","genre":["Metalcore","Heavy Metal"],"type":"band"},{"id":"p003","band":"Dumdum Boys","day":"Wednesday","stage":"Scream Stage","start":"18:15","end":"19:25","genre":["Post-Punk"],"type":"band"},{"id":"p004","band":"Bring Me The Horizon","day":"Wednesday","stage":"Scream Stage","start":"21:25","end":"22:55","genre":["Metalcore","Pop"],"type":"band"},{"id":"p005","band":"Cavalera","day":"Wednesday","stage":"Vampire Stage","start":"14:55","end":"15:45","genre":["Thrash Metal"],"type":"band"},{"id":"p006","band":"Babymetal","day":"Wednesday","stage":"Vampire Stage","start":"17:05","end":"18:05","genre":["Metal","Pop Metal"],"type":"band"},{"id":"p007","band":"The Offspring","day":"Wednesday","stage":"Vampire Stage","start":"19:40","end":"21:10","genre":["Punk Rock"],"type":"band"},{"id":"p008","band":"Die Spitz","day":"Wednesday","stage":"Moonlight Stage","start":"14:10","end":"14:55","genre":["Norwegian Rock"],"type":"band"},{"id":"p009","band":"President","day":"Wednesday","stage":"Moonlight Stage","start":"15:25","end":"16:10","genre":["Rock"],"type":"band"},{"id":"p010","band":"The Carburetors","day":"Wednesday","stage":"Moonlight Stage","start":"16:45","end":"17:35","genre":["Hard Rock","Rock"],"type":"band"},{"id":"p011","band":"Blood Incantation","day":"Wednesday","stage":"Moonlight Stage","start":"18:55","end":"19:45","genre":["Death Metal"],"type":"band"},{"id":"p012","band":"BFD + Bathory","day":"Wednesday","stage":"Moonlight Stage","start":"20:20","end":"21:20","genre":["Black Metal"],"type":"band"},{"id":"p013","band":"Martin Beyer-Olsen","day":"Wednesday","stage":"The Storm Stage","start":"14:20","end":"14:50","genre":["Folk"],"type":"annet"},{"id":"p014","band":"Turdus Musicus","day":"Wednesday","stage":"The Storm Stage","start":"16:00","end":"16:30","genre":["Norwegian Folk"],"type":"band"},{"id":"p015","band":"Cécile Moroni","day":"Wednesday","stage":"The Storm Stage","start":"18:10","end":"18:40","genre":["Norwegian Folk"],"type":"annet"},{"id":"p016","band":"Jordsjuk","day":"Wednesday","stage":"The Storm Stage","start":"19:10","end":"19:40","genre":["Traditional Norwegian"],"type":"band"},{"id":"p017","band":"Apocalyptica","day":"Thursday","stage":"Scream Stage","start":"13:50","end":"14:35","genre":["Symphonic Metal","Cello Metal"],"type":"band"},{"id":"p018","band":"D-A-D","day":"Thursday","stage":"Scream Stage","start":"15:45","end":"16:35","genre":["Hard Rock","Heavy Metal"],"type":"band"},{"id":"p019","band":"Anthrax","day":"Thursday","stage":"Scream Stage","start":"17:55","end":"18:55","genre":["Thrash Metal"],"type":"band"},{"id":"p020","band":"Iron Maiden","day":"Thursday","stage":"Scream Stage","start":"20:45","end":"22:55","genre":["Heavy Metal","NWOBHM"],"type":"band"},{"id":"p021","band":"Audrey Horne","day":"Thursday","stage":"Vampire Stage","start":"13:00","end":"13:45","genre":["Hard Rock","Heavy Metal"],"type":"band"},{"id":"p022","band":"Imminence","day":"Thursday","stage":"Vampire Stage","start":"14:45","end":"15:35","genre":["Alternative Metal"],"type":"band"},{"id":"p023","band":"Suicidal Tendencies","day":"Thursday","stage":"Vampire Stage","start":"16:45","end":"17:45","genre":["Funk Metal"],"type":"band"},{"id":"p024","band":"Alice Cooper","day":"Thursday","stage":"Vampire Stage","start":"19:10","end":"20:25","genre":["Shock Rock","Hard Rock"],"type":"band"},{"id":"p025","band":"The Baboon Show","day":"Thursday","stage":"Moonlight Stage","start":"13:15","end":"14:00","genre":["Norwegian Rock"],"type":"band"},{"id":"p026","band":"Grandson","day":"Thursday","stage":"Moonlight Stage","start":"14:35","end":"15:20","genre":["Alternative Rock","Rap Rock"],"type":"band"},{"id":"p027","band":"Yonaka","day":"Thursday","stage":"Moonlight Stage","start":"16:05","end":"16:55","genre":["Alternative Rock"],"type":"band"},{"id":"p028","band":"The Warning","day":"Thursday","stage":"Moonlight Stage","start":"17:40","end":"18:30","genre":["Pop Rock"],"type":"band"},{"id":"p029","band":"PaleFace Swiss","day":"Thursday","stage":"Moonlight Stage","start":"19:20","end":"20:20","genre":["Swiss Rock"],"type":"band"},{"id":"p030","band":"Sarah Løvald","day":"Thursday","stage":"The Storm Stage","start":"14:00","end":"14:30","genre":["Norwegian Pop"],"type":"annet"},{"id":"p031","band":"Angell","day":"Thursday","stage":"The Storm Stage","start":"15:35","end":"16:05","genre":["Black Metal","Death Metal"],"type":"band"},{"id":"p032","band":"Paul Myrehaug","day":"Thursday","stage":"The Storm Stage","start":"17:45","end":"18:15","genre":["Electronic"],"type":"annet"},{"id":"p033","band":"Ramonas Tea Party","day":"Thursday","stage":"The Storm Stage","start":"18:40","end":"19:10","genre":["Rock"],"type":"band"},{"id":"p034","band":"Raga Rockers","day":"Friday","stage":"Scream Stage","start":"13:20","end":"14:10","genre":["Indian Rock"],"type":"band"},{"id":"p035","band":"The Hellacopters","day":"Friday","stage":"Scream Stage","start":"15:05","end":"16:05","genre":["Hard Rock","Rock n Roll"],"type":"band"},{"id":"p036","band":"The Hives","day":"Friday","stage":"Scream Stage","start":"17:10","end":"18:20","genre":["Garage Rock","Punk"],"type":"band"},{"id":"p037","band":"Joan Jett and the Blackhearts ?","day":"Friday","stage":"Scream Stage","start":"19:30","end":"20:50","genre":["Rock","Punk Rock","Hard Rock"],"type":"band"},{"id":"p038","band":"Norge – Frankrike","day":"Friday","stage":"Scream Stage","start":"21:05","end":"22:55","genre":["Rock"],"type":"event"},{"id":"p039","band":"Eivør","day":"Friday","stage":"Vampire Stage","start":"12:30","end":"13:20","genre":["Folk Pop"],"type":"band"},{"id":"p040","band":"Queensrÿche","day":"Friday","stage":"Vampire Stage","start":"14:10","end":"15:00","genre":["Progressive Metal"],"type":"band"},{"id":"p041","band":"Avatar","day":"Friday","stage":"Vampire Stage","start":"16:10","end":"17:05","genre":["Melodic Metal"],"type":"band"},{"id":"p042","band":"Behemoth","day":"Friday","stage":"Vampire Stage","start":"18:25","end":"19:20","genre":["Black Metal","Death Metal"],"type":"band"},{"id":"p043","band":"Rival Sons","day":"Friday","stage":"Vampire Stage","start":"21:30","end":"22:30","genre":["Hard Rock","Blues Rock"],"type":"band"},{"id":"p044","band":"The Funeral Portrait","day":"Friday","stage":"Moonlight Stage","start":"13:00","end":"13:40","genre":["Alternative Metal"],"type":"band"},{"id":"p045","band":"Kublai Khan TX","day":"Friday","stage":"Moonlight Stage","start":"14:10","end":"14:55","genre":["Metalcore"],"type":"band"},{"id":"p046","band":"Storm","day":"Friday","stage":"Moonlight Stage","start":"16:25","end":"16:10","genre":["Black Metal"],"type":"band"},{"id":"p047","band":"Dogstar","day":"Friday","stage":"Moonlight Stage","start":"16:45","end":"17:35","genre":["Alternative Rock"],"type":"band"},{"id":"p048","band":"Elder","day":"Friday","stage":"Moonlight Stage","start":"18:10","end":"19:00","genre":["Stoner Rock"],"type":"band"},{"id":"p049","band":"Mayhem","day":"Friday","stage":"Moonlight Stage","start":"19:40","end":"20:50","genre":["Black Metal"],"type":"band"},{"id":"p050","band":"Possessed","day":"Friday","stage":"Moonlight Stage","start":"21:40","end":"22:30","genre":["Death Metal"],"type":"band"},{"id":"p051","band":"Mørk Medisin + Dag Sørås & Espen Abrahamsen","day":"Friday","stage":"The Storm Stage","start":"15:00","end":"15:30","genre":["Jazz"],"type":"annet"},{"id":"p052","band":"Høst","day":"Friday","stage":"The Storm Stage","start":"17:10","end":"17:40","genre":["Prog Rock","Hard Rock"],"type":"band"},{"id":"p053","band":"Nora Svenningsen","day":"Friday","stage":"The Storm Stage","start":"18:10","end":"18:40","genre":["Norwegian Pop"],"type":"annet"},{"id":"p054","band":"Koco Franco","day":"Friday","stage":"The Storm Stage","start":"19:10","end":"19:40","genre":["Brazilian Rock"],"type":"band"},{"id":"p055","band":"DDR","day":"Saturday","stage":"Scream Stage","start":"14:00","end":"14:50","genre":["Hard Rock"],"type":"band"},{"id":"p056","band":"Sepultura","day":"Saturday","stage":"Scream Stage","start":"16:10","end":"17:10","genre":["Thrash Metal"],"type":"band"},{"id":"p057","band":"Accept","day":"Saturday","stage":"Scream Stage","start":"18:40","end":"19:55","genre":["Heavy Metal","Speed Metal"],"type":"band"},{"id":"p058","band":"Limp Bizkit","day":"Saturday","stage":"Scream Stage","start":"21:25","end":"22:55","genre":[],"type":"band"},{"id":"p059","band":"Pain","day":"Saturday","stage":"Vampire Stage","start":"13:00","end":"13:50","genre":["Industrial Metal"],"type":"band"},{"id":"p060","band":"Black Label Society","day":"Saturday","stage":"Vampire Stage","start":"15:05","end":"15:55","genre":["Heavy Metal","Doom Metal"],"type":"band"},{"id":"p061","band":"Leprous","day":"Saturday","stage":"Vampire Stage","start":"17:25","end":"18:25","genre":["Progressive Metal"],"type":"band"},{"id":"p062","band":"A Perfect Circle","day":"Saturday","stage":"Vampire Stage","start":"20:05","end":"21:15","genre":["Alternative Metal"],"type":"band"},{"id":"p063","band":"Ego Kill Talent","day":"Saturday","stage":"Moonlight Stage","start":"13:00","end":"13:40","genre":["Metalcore"],"type":"band"},{"id":"p064","band":"Slay Squad","day":"Saturday","stage":"Moonlight Stage","start":"14:10","end":"14:55","genre":["Rock"],"type":"band"},{"id":"p065","band":"Gaerea","day":"Saturday","stage":"Moonlight Stage","start":"15:25","end":"16:10","genre":["Black Metal"],"type":"band"},{"id":"p066","band":"Gatecreeper","day":"Saturday","stage":"Moonlight Stage","start":"19:45","end":"17:35","genre":["Death Metal"],"type":"band"},{"id":"p067","band":"Blood Red Throne","day":"Saturday","stage":"Moonlight Stage","start":"18:55","end":"19:45","genre":["Death Metal"],"type":"band"},{"id":"p068","band":"Death To All","day":"Saturday","stage":"Moonlight Stage","start":"20:15","end":"21:15","genre":["Metal"],"type":"band"},{"id":"p069","band":"Javad El Bakali","day":"Saturday","stage":"The Storm Stage","start":"14:00","end":"14:30","genre":["Soul"],"type":"annet"},{"id":"p070","band":"You Know Who","day":"Saturday","stage":"The Storm Stage","start":"16:00","end":"16:30","genre":["Rock"],"type":"band"},{"id":"p071","band":"Bill Bailey","day":"Saturday","stage":"The Storm Stage","start":"18:25","end":"18:55","genre":["Comedy Rock"],"type":"annet"},{"id":"p072","band":"Baphy","day":"Saturday","stage":"The Storm Stage","start":"19:30","end":"20:00","genre":["Rock"],"type":"band"}];
+
+    // Bygger `schedule` (dag -> scene -> oppføringer), `bandGenres` og
+    // `actType` fra den flate lista appen henter fra /api/lineup.
+    function rebuildScheduleFromFlat(flat) {
+      const byDay = {};
+      DAY_ORDER.forEach(d => { byDay[d] = { day: d, date: DAY_DATES[d], stages: {} }; });
+      const newGenres = {};
+      const newActType = {};
+
+      flat.forEach(p => {
+        if (!byDay[p.day]) return; // ukjent dag, ignorer trygt
+        const dayObj = byDay[p.day];
+        if (!dayObj.stages[p.stage]) dayObj.stages[p.stage] = [];
+        dayObj.stages[p.stage].push({ id: p.id, band: p.band, start: p.start, end: p.end });
+        newGenres[p.band] = p.genre || [];
+        if (p.type && p.type !== 'band') newActType[p.band] = p.type;
+      });
+
+      // Sorter hver scene kronologisk på starttid
+      DAY_ORDER.forEach(d => {
+        Object.values(byDay[d].stages).forEach(list => list.sort((a, b) => a.start.localeCompare(b.start)));
+      });
+
+      schedule = DAY_ORDER.map(d => byDay[d]);
+      bandGenres = newGenres;
+      actType = newActType;
+    }
+
+    // Henter programmet fra skyen. Faller tilbake til lokal reservekopi
+    // hvis nettet/funksjonen ikke svarer, så appen aldri viser tom liste.
+    let currentFlatLineup = FALLBACK_LINEUP;
+    async function loadLineup() {
+      try {
+        const res = await fetch('/api/lineup');
+        const data = await res.json();
+        if (Array.isArray(data.lineup) && data.lineup.length > 0) {
+          currentFlatLineup = data.lineup;
+        }
+      } catch (e) {
+        currentFlatLineup = FALLBACK_LINEUP; // skyen nede — bruk reservekopi
+      }
+      rebuildScheduleFromFlat(currentFlatLineup);
+    }
+
+    let selectedDay = 0, selectedStage = null, selectedGenre = null;
+    const stageMap = { 'Orange Scene': 'scream', 'Arena': 'vampire', 'Lagune': 'moonlight', 'The Yard': 'storm', 'Stadion': 'scream', 'Dancefloor': 'vampire', 'Skate': 'moonlight', 'Re:Act': 'storm', 'Grow': 'scream', 'Cinema': 'vampire', 'Rehearsals of Belonging': 'moonlight', 'Eos': 'storm' };
+    const stageShort = { 'Scream Stage': 'Scream', 'Vampire Stage': 'Vampire', 'Moonlight Stage': 'Moon', 'The Storm Stage': 'Storm' };
+
+    // ============================================================
+    // LAST.FM API — lim inn din gratis API-nøkkel her:
+    // Hent nøkkel på https://www.last.fm/api/account/create (tar 2 min)
+    const LASTFM_API_KEY = 'fa25a6ec230da428e1cb986cd924482a';
+    // ============================================================
+
+    // Klassifisering: oppføringer som IKKE er musikkband.
+    // 'event' = fotball/quiz, 'annet' = standup/karaoke/silent disco (Storm Stage).
+    // Bygges nå dynamisk fra programmet (se rebuildScheduleFromFlat) i stedet
+    // for en hardkodet liste, slik at admin kan endre type per oppføring.
+    let actType = {};
+    // Returnerer 'band' (default), 'event' eller 'annet'
+    function getActType(name) { return actType[name] || 'band'; }
+
+    // ===== FAVORITTER — sky-sync med localStorage som fallback =====
+    const API = '/api/favorites'; // Netlify-funksjon
+    let showFavoritesOnly = false;
+    let currentUser = null;        // innlogget brukernavn (null = lokal modus)
+    let localMode = false;         // true = bruker valgte å kjøre lokalt
+    let viewingFriend = null;      // { name, favorites } når man ser på en venn
+    let myFriends = [];            // mine valgte venner (brukernavn)
+    let allUsers = [];             // alle registrerte brukere [{name,count,updated}]
+    let showFriendsOnCards = true; // av/på: vis "Favoritter til:" på kort (default PÅ)
+    let bandFavCounts = {};        // { bandnavn: { total, friends:[navn] } }
+    const AUTO_VENNER_UNDER = 15;  // under denne grensen er alle automatisk venner
+    let autoFriendMode = false;    // true når < AUTO_VENNER_UNDER brukere
+    let capWarningShown = false;   // har vi vist 15+-advarselen?
+
+    // Tekst over venne-pillene — én tilfeldig per økt (byttes ved ny åpning)
+    const FAV_LABELS = [
+      'Favoritter til:',
+      'Venners utsøkte smak:',
+      'Venner med sans:',
+      'Disse vet hva som er bra:',
+      'Folk med god smak skal hit:',
+      'Vennegjengens valg:',
+      'Disse rockerne har valgt:',
+      'Møt disse folka her:',
+      'Folket har talt:',
+      'Gjengen som stiller:',
+      'Her samles flokken:',
+      'Rock on!'
+    ];
+    const favLabel = FAV_LABELS[Math.floor(Math.random() * FAV_LABELS.length)];
+
+    // Lokal lagring (fallback + cache)
+    function loadLocalFavorites() {
+      try { return new Set(JSON.parse(localStorage.getItem('tor_favorites') || '[]')); }
+      catch (e) { return new Set(); }
+    }
+    function saveLocalFavorites(set) {
+      try { localStorage.setItem('tor_favorites', JSON.stringify([...set])); }
+      catch (e) { /* utilgjengelig */ }
+    }
+    let favorites = loadLocalFavorites();
+
+    function isFavorite(name) { return favorites.has(name); }
+
+    async function toggleFavorite(name) {
+      if (favorites.has(name)) favorites.delete(name); else favorites.add(name);
+      saveLocalFavorites(favorites);              // alltid lokalt umiddelbart
+      if (currentUser && !localMode) {
+        try { await saveFavoritesToCloud(); }     // synk til sky hvis innlogget
+        catch (e) { /* nett nede — lokalt er allerede lagret */ }
+      }
+    }
+
+    // ---- Sky-kommunikasjon ----
+    async function fetchCloudFavorites(user) {
+      const res = await fetch(`${API}?user=${encodeURIComponent(user)}`);
+      if (!res.ok) throw new Error('Kunne ikke hente (' + res.status + ')');
+      return res.json(); // { user, favorites, friends, updated }
+    }
+    async function saveFavoritesToCloud() {
+      if (!currentUser) return;
+      const res = await fetch(API, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user: currentUser, favorites: [...favorites], friends: myFriends })
+      });
+      if (!res.ok) throw new Error('Lagring feilet (' + res.status + ')');
+      return res.json();
+    }
+    async function fetchAllUsers() {
+      const res = await fetch('/api/users');
+      if (!res.ok) throw new Error('Kunne ikke hente brukere (' + res.status + ')');
+      const data = await res.json();
+      return data.users || [];
+    }
+    // Bygg tellinger per band: hvor mange totalt + hvilke venner
+    // Under AUTO_VENNER_UNDER brukere regnes ALLE som venner (visning).
+    async function buildBandCounts() {
+      bandFavCounts = {};
+      try {
+        const users = await fetchAllUsers();
+        allUsers = users;
+        autoFriendMode = users.length < AUTO_VENNER_UNDER;
+        // Hvem teller som "venn" for visning:
+        const friendSet = autoFriendMode
+          ? new Set(users.map(u => u.name))   // alle er venner
+          : new Set(myFriends);               // bare valgte venner
+        for (const u of users) {
+          // Hopp over deg selv helt — "Favoritter til:" handler om ANDRE enn deg.
+          // (Din egen favoritt ser du allerede via stjerna på kortet.)
+          if (u.name === currentUser) continue;
+          const data = await fetchCloudFavorites(u.name);
+          (data.favorites || []).forEach(band => {
+            if (!bandFavCounts[band]) bandFavCounts[band] = { total: 0, friends: [] };
+            bandFavCounts[band].total++;
+            if (friendSet.has(u.name)) {
+              bandFavCounts[band].friends.push(u.name);
+            }
+          });
+        }
+        // Advarsel når vi nettopp passerte grensen (16+ brukere)
+        if (!autoFriendMode && users.length >= AUTO_VENNER_UNDER && !capWarningShown) {
+          capWarningShown = true;
+          showCapWarning(users.length);
+        }
+      } catch (e) { /* nett nede — ingen tellinger, kort vises rene */ }
+    }
+
+    // ---- Brukernavn-håndtering ----
+    function getStoredUser() {
+      try { return localStorage.getItem('tor_user'); } catch (e) { return null; }
+    }
+    function setStoredUser(name) {
+      try { if (name) localStorage.setItem('tor_user', name); else localStorage.removeItem('tor_user'); }
+      catch (e) {}
+    }
+
+    // Logg på en bruker: hent favoritter + venner fra sky, slå sammen lokale
+    async function loginUser(name) {
+      const data = await fetchCloudFavorites(name);
+      const cloud = new Set(data.favorites || []);
+      favorites.forEach(f => cloud.add(f));
+      favorites = cloud;
+      myFriends = data.friends || [];
+      currentUser = name;
+      localMode = false;
+      setStoredUser(name);
+      saveLocalFavorites(favorites);
+      await saveFavoritesToCloud();
+    }
+
+    function startLocalMode() {
+      localMode = true;
+      currentUser = null;
+      favorites = loadLocalFavorites();
+    }
+
+    // Logg ut: glem lagret bruker, tilbake til lokal modus.
+    // Favorittene ligger trygt i skyen under brukernavnet + lokalt.
+    function logout() {
+      if (!confirm('Logge ut? Favorittene dine er trygt lagret i skyen under «' + currentUser + '».')) return;
+      setStoredUser(null);       // appen husker deg ikke lenger
+      currentUser = null;
+      myFriends = [];
+      viewingFriend = null;
+      bandFavCounts = {};
+      startLocalMode();
+      renderUserBar();
+      render();
+    }
+
+
+    // Auto-detect current day - festival is June 24-27, 2026
+    function getDefaultDay() {
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = now.getMonth();
+      const day = now.getDate();
+      
+      // Festival dates
+      const festivalStart = new Date(2026, 5, 24); // June 24, 2026
+      const festivalEnd = new Date(2026, 5, 27);   // June 27, 2026
+      
+      if (now >= festivalStart && now <= festivalEnd) {
+        const dayOfWeek = now.getDay();
+        // 0=Sunday, 3=Wednesday (June 24), 4=Thursday, 5=Friday, 6=Saturday
+        if (dayOfWeek === 3) return 0; // Wednesday
+        if (dayOfWeek === 4) return 1; // Thursday
+        if (dayOfWeek === 5) return 2; // Friday
+        if (dayOfWeek === 6) return 3; // Saturday
+      }
+      return 0; // Default to Wednesday
+    }
+
+    selectedDay = getDefaultDay();
+
+    function showModal(title, subtitle, content) {
+      const modal = document.createElement('div');
+      modal.className = 'modal-overlay';
+      modal.innerHTML = `<div class="modal"><button class="modal-close">✕</button><h2>${title}</h2>${subtitle ? `<div class="modal-subtitle">${subtitle}</div>` : ''}<div class="modal-content">${content}</div></div>`;
+      modal.querySelector('.modal-close').addEventListener('click', () => modal.remove());
+      modal.addEventListener('click', (e) => e.target === modal && modal.remove());
+      document.body.appendChild(modal);
+      return modal;
+    }
+
+    // Henter lignende artister fra Last.fm (ekte lyttedata)
+    async function fetchSimilarArtists(bandName) {
+      const url = `https://ws.audioscrobbler.com/2.0/?method=artist.getsimilar&artist=${encodeURIComponent(bandName)}&api_key=${LASTFM_API_KEY}&autocorrect=1&limit=12&format=json`;
+      const res = await fetch(url);
+      if (!res.ok) throw new Error('Last.fm svarte ikke (' + res.status + ')');
+      const data = await res.json();
+      if (data.error) throw new Error(data.message || 'Last.fm-feil');
+      const list = (data.similarartists && data.similarartists.artist) || [];
+      return list.map(a => ({ name: a.name, match: parseFloat(a.match) || 0 }));
+    }
+
+    async function showComparison(bandName) {
+      const modal = showModal(bandName, 'Lignende artister (Last.fm)', '<p style="color:#a1a1aa;">Laster lignende artister…</p>');
+      const contentEl = modal.querySelector('.modal-content');
+
+      if (!LASTFM_API_KEY || LASTFM_API_KEY === 'DIN_API_NOKKEL_HER') {
+        contentEl.innerHTML = `<p style="color:#fca5a5;">Mangler Last.fm API-nøkkel.</p><p style="color:#a1a1aa;font-size:0.85rem;margin-top:0.5rem;">Hent en gratis nøkkel på <a href="https://www.last.fm/api/account/create" target="_blank" rel="noopener" style="color:#60a5fa;">last.fm/api</a> og lim den inn i koden (LASTFM_API_KEY).</p>`;
+        return;
+      }
+
+      try {
+        const similar = await fetchSimilarArtists(bandName);
+        if (similar.length === 0) {
+          contentEl.innerHTML = `<p style="color:#a1a1aa;">Fant ingen lignende artister for «${bandName}».</p><a href="https://open.spotify.com/search/${encodeURIComponent(bandName)}" target="_blank" rel="noopener" class="track-item" style="border-color:#1db954;background:rgba(29,185,84,0.1);margin-top:0.75rem;"><div class="track-name">🎧 Søk ${bandName} på Spotify</div><div class="track-link" style="color:#1db954;">Åpne →</div></a>`;
+          return;
+        }
+        contentEl.innerHTML = similar.map(a => {
+          const pct = Math.round(a.match * 100);
+          const spotifyUrl = `https://open.spotify.com/search/${encodeURIComponent(a.name)}`;
+          return `<a href="${spotifyUrl}" target="_blank" rel="noopener noreferrer" class="track-item"><div class="track-name">${a.name}</div><div class="track-link">${pct > 0 ? pct + '% match · ' : ''}Åpne på Spotify →</div></a>`;
+        }).join('');
+      } catch (err) {
+        contentEl.innerHTML = `<p style="color:#fca5a5;">Kunne ikke hente data: ${err.message}</p><p style="color:#a1a1aa;font-size:0.85rem;margin-top:0.5rem;">Sjekk nettforbindelsen, eller søk direkte:</p><a href="https://open.spotify.com/search/${encodeURIComponent(bandName)}" target="_blank" rel="noopener" class="track-item" style="border-color:#1db954;background:rgba(29,185,84,0.1);margin-top:0.5rem;"><div class="track-name">🎧 ${bandName} på Spotify</div><div class="track-link" style="color:#1db954;">Åpne →</div></a>`;
+      }
+    }
+
+    function showTracks(bandName) {
+      const tracks = popularTracks[bandName] || [];
+      const artistUrl = `https://open.spotify.com/search/${encodeURIComponent(bandName)}`;
+      const tracksHtml = tracks.length > 0 
+        ? tracks.map(t => {
+          const url = `https://open.spotify.com/search/${encodeURIComponent(bandName + ' ' + t)}`;
+          return `<a href="${url}" target="_blank" rel="noopener noreferrer" class="track-item"><div class="track-name">${t}</div><div class="track-link">Open in Spotify →</div></a>`;
+        }).join('') + `<a href="${artistUrl}" target="_blank" rel="noopener noreferrer" class="track-item" style="border-color: #1db954; background: rgba(29,185,84,0.1);"><div class="track-name">🎧 All songs by ${bandName}</div><div class="track-link" style="color: #1db954;">Open artist on Spotify →</div></a>`
+        : `<a href="${artistUrl}" target="_blank" rel="noopener noreferrer" class="track-item" style="border-color: #1db954; background: rgba(29,185,84,0.1);"><div class="track-name">🎧 ${bandName} on Spotify</div><div class="track-link" style="color: #1db954;">Open artist page →</div></a>`;
+      showModal(bandName, tracks.length > 0 ? 'Popular Tracks' : 'Listen on Spotify', `<div class="tracks-section">${tracksHtml}</div>`);
+    }
+
+    const stageIcon = { 'Scream Stage': '🔴', 'Vampire Stage': '🟣', 'Moonlight Stage': '🔵', 'The Storm Stage': '⚪' };
+
+    function render() {
+      const dayButtons = document.getElementById('dayButtons');
+      dayButtons.innerHTML = schedule.map((d, i) => `<button class="btn-day ${i === selectedDay && !showFavoritesOnly ? 'active' : ''}">${d.day}</button>`).join('');
+      dayButtons.querySelectorAll('button').forEach((btn, i) => {
+        btn.addEventListener('click', () => { selectedDay = i; selectedStage = null; showFavoritesOnly = false; render(); });
+      });
+
+      const stageButtons = document.getElementById('stageButtons');
+      const stages = Object.keys(schedule[selectedDay].stages);
+      const segMap = { 'Scream Stage': 'seg-scream', 'Vampire Stage': 'seg-vampire', 'Moonlight Stage': 'seg-moonlight', 'The Storm Stage': 'seg-storm' };
+      const favRow = `<div class="fav-row"><button class="btn-fav ${showFavoritesOnly ? 'active' : ''}">⭐ Mine favoritter <span class="fav-count">(${favorites.size})</span></button></div>`;
+      const segmented = `<div class="segmented">` +
+        `<button class="seg-all ${selectedStage === null && !showFavoritesOnly ? 'active' : ''}">Alle</button>` +
+        stages.map(s => `<button class="${segMap[s]} ${s === selectedStage && !showFavoritesOnly ? 'active' : ''}">${stageShort[s]}</button>`).join('') +
+        `</div>`;
+      stageButtons.innerHTML = favRow + segmented;
+      stageButtons.querySelector('.btn-fav').addEventListener('click', () => { showFavoritesOnly = !showFavoritesOnly; render(); });
+      const segBtns = stageButtons.querySelectorAll('.segmented button');
+      segBtns.forEach((btn, i) => {
+        btn.addEventListener('click', () => { selectedStage = i === 0 ? null : stages[i - 1]; showFavoritesOnly = false; render(); });
+      });
+
+      let perfs = [];
+      let dayHeader = '';
+      const content = document.getElementById('content');
+
+      if (showFavoritesOnly) {
+        // Favoritter på tvers av alle dager — egne eller en venns
+        const favSet = viewingFriend ? viewingFriend.favorites : favorites;
+        const isFav = (name) => favSet.has(name);
+        schedule.forEach(d => Object.entries(d.stages).forEach(([s, p]) => p.forEach(b => {
+          if (isFav(b.band)) perfs.push({...b, stage: s, day: d.day, date: d.date});
+        })));
+        const title = viewingFriend ? `👀 ${viewingFriend.name} sine favoritter` : '⭐ Mine favoritter';
+        dayHeader = `<div class="day-header"><h2>${title}</h2><p>${perfs.length} valgt · på tvers av alle dager</p></div>`;
+        if (perfs.length === 0) {
+          const msg = viewingFriend ? `${viewingFriend.name} har ingen favoritter ennå.` : 'Ingen favoritter ennå.<br>Trykk på ⭐ ved siden av et band for å lagre.';
+          content.innerHTML = dayHeader + `<div class="no-results">${msg}</div>`;
+          return;
+        }
+      } else {
+        const day = schedule[selectedDay];
+        if (selectedStage) {
+          perfs = day.stages[selectedStage].map(p => ({...p, stage: selectedStage}));
+        } else {
+          Object.entries(day.stages).forEach(([s, p]) => p.forEach(b => perfs.push({...b, stage: s})));
+          perfs.sort((a, b) => a.start.localeCompare(b.start));
+        }
+        if (perfs.length === 0) { content.innerHTML = '<div class="no-results">No bands found.</div>'; return; }
+        const dayData = schedule[selectedDay];
+        const prevDay = selectedDay > 0 ? selectedDay - 1 : null;
+        const nextDay = selectedDay < schedule.length - 1 ? selectedDay + 1 : null;
+        dayHeader = `<div class="day-header">${prevDay !== null ? `<button class="day-nav-btn prev">←</button>` : ''}<h2>${dayData.day}</h2><p>${dayData.date}</p>${nextDay !== null ? `<button class="day-nav-btn next">→</button>` : ''}</div>`;
+      }
+
+      content.innerHTML = dayHeader + perfs.map((p, i) => {
+        const genres = (bandGenres[p.band] || []).join(' • ');
+        const type = getActType(p.band);
+        const fav = isFavorite(p.band);
+        // Skjul stjerne når man ser på en venns liste (skrivebeskyttet)
+        const starBtn = viewingFriend ? '' : `<button class="star-btn ${fav ? 'active' : ''}" data-fav-idx="${i}" title="${fav ? 'Fjern favoritt' : 'Lagre favoritt'}">${fav ? '★' : '☆'}</button>`;
+        const dayTag = showFavoritesOnly ? `<span class="date-badge">${p.day}</span>` : '';
+        const stageTag = `<span class="stage-tag ${stageMap[p.stage] || 'storm'}">${stageShort[p.stage] || p.stage}</span>`;
+
+        if (type !== 'band') {
+          const icon = type === 'event' ? '⚽' : '🎤';
+          const label = type === 'event' ? 'Storskjerm-event' : 'Standup / scene';
+          return `<div class="performance stage-${stageMap[p.stage] || 'storm'}"><div class="performance-info"><div class="band-line">${starBtn}<div class="band-text"><div class="performance-band">${icon} ${p.band}</div><div class="performance-genres">${label}</div><div class="performance-meta">${stageTag}<span class="time-badge">${p.start} – ${p.end}</span>${dayTag}</div></div></div></div></div>`;
+        }
+
+        // Venne-rad (Variant A): "Favoritter til:" + LFM/Spotify øverst, navn-piller under
+        let friendsBar = '';
+        const counts = bandFavCounts[p.band];
+        const btnFamily = `<div class="btn-row"><button class="icon-btn pos" data-idx="${i}" data-action="position" title="Hvor står du?">📍</button><button class="icon-btn lfm" data-idx="${i}" data-action="compare" title="Lignende artister (Last.fm)">♫ LFM</button><button class="icon-btn spotify" data-idx="${i}" data-action="tracks" title="Topplåter (Spotify)">♪</button></div>`;
+        if (showFriendsOnCards) {
+          let pillsHtml = '';
+          if (counts && counts.friends.length > 0) {
+            const inits = computeInitials(counts.friends);
+            const MAX_NAMES = 10;
+            const shown = counts.friends.slice(0, MAX_NAMES);
+            const hiddenFriends = counts.friends.length - shown.length;
+            pillsHtml = shown.map(f => {
+              const firstName = f.split(/\s+/)[0]; // vis fornavn i pillen
+              return `<span class="nametag" data-fullname="${f}"><span class="dot ${colorClass(f)}">${inits[f]}</span>${firstName}</span>`;
+            }).join('');
+            // "+N andre" = skjulte venner + ikke-venner
+            const others = (counts.total - counts.friends.length) + hiddenFriends;
+            if (others > 0) pillsHtml += `<span class="total-count">+${others} andre</span>`;
+          } else if (counts && counts.total > 0) {
+            pillsHtml = `<span class="total-count">${counts.total} totalt</span>`;
+          } else {
+            pillsHtml = `<span class="total-count" style="color:#52525b;">ingen ennå</span>`;
+          }
+          friendsBar = `<div class="friends-bar"><span class="fav-label">${favLabel}</span><div class="nametags">${pillsHtml}</div></div>`;
+        }
+
+        return `<div class="performance stage-${stageMap[p.stage] || 'storm'}"><div class="performance-info"><div class="band-line">${starBtn}<div class="band-text"><div class="performance-band">${p.band}</div>${genres ? `<div class="performance-genres">${genres}</div>` : ''}<div class="performance-meta">${stageTag}<span class="time-badge">${p.start} – ${p.end}</span>${dayTag}</div></div></div><div class="action-row">${btnFamily}</div>${friendsBar}</div></div>`;
+      }).join('');
+
+      window.currentPerfs = perfs;
+      content.querySelectorAll('[data-fav-idx]').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const band = window.currentPerfs[parseInt(btn.dataset.favIdx)].band;
+          await toggleFavorite(band);
+          render();
+        });
+      });
+      content.querySelectorAll('[data-action]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const perf = window.currentPerfs[parseInt(btn.dataset.idx)];
+          const band = perf.band;
+          if (btn.dataset.action === 'compare') showComparison(band);
+          else if (btn.dataset.action === 'tracks') showTracks(band);
+          else if (btn.dataset.action === 'position') showConcertDetail(perf);
+        });
+      });
+      // Klikk på navn-pille → vis fullt navn
+      content.querySelectorAll('.nametag').forEach(el => {
+        el.addEventListener('click', () => {
+          const name = el.getAttribute('data-fullname');
+          if (name) showModal(name, 'Festivalvenn', `<p style="color:#d4d4d8;">${name} har dette bandet som favoritt.</p>`);
+        });
+      });
+
+      // Add day navigation listeners
+      const prevBtn = content.parentElement.querySelector('.day-nav-btn.prev');
+      const nextBtn = content.parentElement.querySelector('.day-nav-btn.next');
+      if (prevBtn) prevBtn.addEventListener('click', () => { selectedDay--; render(); });
+      if (nextBtn) nextBtn.addEventListener('click', () => { selectedDay++; render(); });
+    }
+
+    // Vis versjonsinfo i footer (klikkbar → endringslogg)
+    const versionEl = document.getElementById('versionInfo');
+    versionEl.innerHTML = `<strong>${APP_VERSION}</strong> · build ${APP_BUILD} · trykk for endringslogg`;
+    versionEl.addEventListener('click', showChangelog);
+    document.getElementById('adminLink').addEventListener('click', showAdminModal);
+    document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+    document.querySelectorAll('#sizeControl button').forEach(b => {
+      b.addEventListener('click', () => setSize(parseInt(b.dataset.size)));
+    });
+
+    function showChangelog() {
+      const html = CHANGELOG.map((entry, idx) => {
+        const items = entry.changes.map(c => `<li>${c}</li>`).join('');
+        return `<div class="changelog-entry ${idx === 0 ? 'current' : ''}"><h4>${entry.version}<span class="cl-date">${entry.date}</span></h4><ul>${items}</ul></div>`;
+      }).join('');
+      showModal('Endringslogg', `Gjeldende versjon: ${APP_VERSION}`, html);
+    }
+
+    // ===== INITIALER (med duplikathåndtering RV1/RV2) =====
+    function computeInitials(names) {
+      // names = liste med brukernavn → { navn: "RV" / "RV1" }
+      const raw = {};
+      names.forEach(n => {
+        const parts = n.trim().split(/\s+/);
+        let init;
+        if (parts.length >= 2) init = (parts[0][0] + parts[1][0]).toUpperCase();
+        else init = n.slice(0, 2).toUpperCase();
+        raw[n] = init;
+      });
+      // Finn duplikater og legg på nummer
+      const counts = {};
+      Object.values(raw).forEach(i => counts[i] = (counts[i] || 0) + 1);
+      const seen = {};
+      const result = {};
+      names.forEach(n => {
+        const i = raw[n];
+        if (counts[i] > 1) { seen[i] = (seen[i] || 0) + 1; result[n] = i + seen[i]; }
+        else result[n] = i;
+      });
+      return result;
+    }
+    function colorClass(name) {
+      // Stabil farge per navn (hash)
+      let h = 0;
+      for (let c of name) h = (h * 31 + c.charCodeAt(0)) % 6;
+      return 'c' + h;
+    }
+
+    // ===== BRUKER-UI =====
+    function renderUserBar() {
+      const bar = document.getElementById('userBar');
+      if (viewingFriend) {
+        bar.innerHTML = `<span class="who">👀 Ser på <strong>${viewingFriend.name}</strong> sine favoritter</span><button id="exitFriend">Tilbake til mine</button>`;
+        bar.querySelector('#exitFriend').addEventListener('click', () => { viewingFriend = null; showFavoritesOnly = false; renderUserBar(); render(); });
+      } else if (currentUser) {
+        const toggleLabel = showFriendsOnCards ? '👥 Venner: PÅ' : '👥 Venner: AV';
+        bar.innerHTML = `<span class="who">☁️ <strong>${currentUser}</strong></span><span style="display:flex;gap:0.4rem;flex-wrap:wrap;"><button id="toggleFriends" style="${showFriendsOnCards ? 'background:#2563eb;color:#fff;' : ''}">${toggleLabel}</button><button id="manageFriends">Venner</button><button id="viewFriend">Se venn</button><button id="switchUser">Bytt</button><button id="logoutBtn">Logg ut</button></span>`;
+        bar.querySelector('#switchUser').addEventListener('click', showLoginModal);
+        bar.querySelector('#viewFriend').addEventListener('click', showFriendModal);
+        bar.querySelector('#manageFriends').addEventListener('click', showManageFriendsModal);
+        bar.querySelector('#logoutBtn').addEventListener('click', logout);
+        bar.querySelector('#toggleFriends').addEventListener('click', async () => {
+          showFriendsOnCards = !showFriendsOnCards;
+          if (showFriendsOnCards && Object.keys(bandFavCounts).length === 0) {
+            await buildBandCounts();
+          }
+          renderUserBar(); render();
+        });
+      } else {
+        bar.innerHTML = `<span class="who">📵 Lokal modus <span class="local-tag">(favoritter kun på denne enheten)</span></span><button id="loginNow">Logg på</button>`;
+        bar.querySelector('#loginNow').addEventListener('click', showLoginModal);
+      }
+    }
+
+    // Onboarding / innlogging — to veier: logg på eksisterende, eller opprett ny
+    function showLoginModal() {
+      const body = `
+        <div class="form-field">
+          <label>Logg på med brukernavnet ditt</label>
+          <input type="text" id="userInput" placeholder="f.eks. Rune" maxlength="30" autocomplete="off">
+        </div>
+        <div id="loginStatus"></div>
+        <button class="modal-btn primary" id="loginConfirm">Logg på</button>
+        <div class="login-divider">ny her?</div>
+        <button class="modal-btn secondary" id="createNew">+ Opprett ny bruker</button>
+        <button class="modal-btn ghost" id="loginLocal">📵 Start lokalt (uten innlogging)</button>
+        <p class="modal-note">Åpen pålogging uten passord. Favoritter lagres i skyen under brukernavnet, så du når dem fra flere enheter og venner ser hva du skal se på. Appen husker deg til neste gang.</p>
+      `;
+      const modal = showModal('Logg på', 'Sky-favoritter', body);
+      const input = modal.querySelector('#userInput');
+      const status = modal.querySelector('#loginStatus');
+      if (currentUser) input.value = currentUser;
+      input.focus();
+
+      modal.querySelector('#loginLocal').addEventListener('click', () => {
+        startLocalMode(); modal.remove(); renderUserBar(); render();
+      });
+      modal.querySelector('#createNew').addEventListener('click', () => {
+        modal.remove(); showCreateUserModal();
+      });
+      modal.querySelector('#loginConfirm').addEventListener('click', async () => {
+        const name = input.value.trim();
+        if (name.length < 3) { status.innerHTML = '<div class="modal-status warn">Brukernavn må være minst 3 tegn.</div>'; return; }
+        status.innerHTML = '<div class="modal-status info">Logger på…</div>';
+        try {
+          await loginUser(name);
+          if (showFriendsOnCards) await buildBandCounts();
+          modal.remove(); renderUserBar(); render();
+        } catch (e) {
+          status.innerHTML = `<div class="modal-status warn">Får ikke kontakt med skyen (${e.message}). Du kan starte lokalt.</div>`;
+        }
+      });
+    }
+
+    // Opprett ny bruker — med duplikatsjekk
+    function showCreateUserModal() {
+      const body = `
+        <div class="form-field">
+          <label>Velg et nytt brukernavn (3–30 tegn)</label>
+          <input type="text" id="newUser" placeholder="f.eks. Kari" maxlength="30" autocomplete="off">
+        </div>
+        <div id="createStatus"></div>
+        <button class="modal-btn primary" id="createConfirm">Opprett</button>
+        <button class="modal-btn ghost" id="backToLogin">← Tilbake</button>
+      `;
+      const modal = showModal('Opprett bruker', 'Velg et ledig brukernavn', body);
+      const input = modal.querySelector('#newUser');
+      const status = modal.querySelector('#createStatus');
+      input.focus();
+      modal.querySelector('#backToLogin').addEventListener('click', () => { modal.remove(); showLoginModal(); });
+      modal.querySelector('#createConfirm').addEventListener('click', async () => {
+        const name = input.value.trim();
+        if (name.length < 3) { status.innerHTML = '<div class="modal-status warn">Minst 3 tegn.</div>'; return; }
+        status.innerHTML = '<div class="modal-status info">Sjekker om navnet er ledig…</div>';
+        try {
+          const data = await fetchCloudFavorites(name);
+          const exists = data && ((data.favorites && data.favorites.length > 0) || data.updated);
+          if (exists) {
+            status.innerHTML = `<div class="modal-status warn">«${name}» er allerede tatt. Velg et annet navn — eller gå tilbake og logg på som ${name} hvis det er deg.</div>`;
+            return;
+          }
+          await loginUser(name);
+          if (showFriendsOnCards) await buildBandCounts();
+          modal.remove(); renderUserBar(); render();
+        } catch (e) {
+          status.innerHTML = `<div class="modal-status warn">Får ikke kontakt med skyen (${e.message}).</div>`;
+        }
+      });
+    }
+
+    // Se en venns favoritter
+    // Se en venn — dropdown fra MINE venner
+    function showFriendModal() {
+      if (myFriends.length === 0) {
+        showModal('Se en venn', 'Ingen venner ennå', `<p style="color:#a1a1aa;">Du har ikke lagt til noen venner ennå. Trykk «Venner» for å velge fra lista.</p><button class="modal-btn primary" id="goManage">Velg venner</button>`).querySelector('#goManage').addEventListener('click', (e) => { e.target.closest('.modal-overlay').remove(); showManageFriendsModal(); });
+        return;
+      }
+      const options = myFriends.map(f => `<option value="${f}">${f}</option>`).join('');
+      const body = `
+        <div class="form-field">
+          <label>Velg fra vennelista di</label>
+          <select class="modal-select" id="friendSelect"><option value="">— velg venn —</option>${options}</select>
+        </div>
+        <div id="friendStatus"></div>
+        <button class="modal-btn primary" id="friendConfirm">Vis favoritter</button>
+        <p class="modal-note">Du ser vennens favoritter skrivebeskyttet. Dine egne forblir uendret.</p>
+      `;
+      const modal = showModal('Se en venn', 'Hva skal vennegjengen se?', body);
+      const select = modal.querySelector('#friendSelect');
+      const status = modal.querySelector('#friendStatus');
+      modal.querySelector('#friendConfirm').addEventListener('click', async () => {
+        const name = select.value;
+        if (!name) { status.innerHTML = '<div class="modal-status warn">Velg en venn først.</div>'; return; }
+        status.innerHTML = '<div class="modal-status info">Henter…</div>';
+        try {
+          const data = await fetchCloudFavorites(name);
+          if (!data.favorites || data.favorites.length === 0) {
+            status.innerHTML = `<div class="modal-status warn">«${name}» har ingen favoritter ennå.</div>`;
+            return;
+          }
+          viewingFriend = { name, favorites: new Set(data.favorites) };
+          showFavoritesOnly = true;
+          modal.remove(); renderUserBar(); render();
+        } catch (e) {
+          status.innerHTML = `<div class="modal-status warn">Kunne ikke hente (${e.message}).</div>`;
+        }
+      });
+    }
+
+    // Velg venner fra liste over alle brukere
+    async function showManageFriendsModal() {
+      const modal = showModal('Mine venner', 'Hak av hvem du vil følge', '<p style="color:#a1a1aa;">Henter brukere…</p>');
+      const content = modal.querySelector('.modal-content');
+      try {
+        const users = await fetchAllUsers();
+        allUsers = users;
+        const others = users.filter(u => u.name !== currentUser);
+        if (others.length === 0) {
+          content.innerHTML = '<p style="color:#a1a1aa;">Ingen andre brukere ennå. Når venner lager profiler, dukker de opp her.</p>';
+          return;
+        }
+        const items = others.map(u => `
+          <label class="pick-item">
+            <input type="checkbox" value="${u.name}" ${myFriends.includes(u.name) ? 'checked' : ''}>
+            <span class="pname">${u.name}</span>
+            <span class="pmeta">${u.count} favoritter</span>
+          </label>`).join('');
+        content.innerHTML = items + `<button class="modal-btn primary" id="saveFriends">Lagre venner</button>`;
+        content.querySelector('#saveFriends').addEventListener('click', async () => {
+          myFriends = [...content.querySelectorAll('input:checked')].map(cb => cb.value);
+          try { await saveFavoritesToCloud(); } catch (e) {}
+          bandFavCounts = {}; // tving ny telling
+          if (showFriendsOnCards) await buildBandCounts();
+          modal.remove(); renderUserBar(); render();
+        });
+      } catch (e) {
+        content.innerHTML = `<div class="modal-status warn">Kunne ikke hente brukere (${e.message}).</div>`;
+      }
+    }
+
+    // Advarsel når brukertallet passerer grensen
+    function showCapWarning(count) {
+      const body = `
+        <div class="cap-warn">Det er nå <strong>${count} brukere</strong> i appen. De du allerede følger er fortsatt vennene dine, men <strong>nye brukere legges ikke til automatisk</strong> lenger. Vil du følge noen av de nye, må du velge dem under «Venner».</div>
+        <button class="modal-btn primary" id="capOk">Skjønner</button>
+        <button class="modal-btn secondary" id="capManage">Åpne «Venner» nå</button>
+      `;
+      const modal = showModal('⚠️ Mer enn ' + AUTO_VENNER_UNDER + ' brukere', 'Auto-venner er slått av', body);
+      modal.querySelector('#capOk').addEventListener('click', () => modal.remove());
+      modal.querySelector('#capManage').addEventListener('click', () => { modal.remove(); showManageFriendsModal(); });
+    }
+
+    // ===== KONSERT-DETALJ MED TRIBUNE-KART =====
+    const ZONE_TAGS = ['FV','FM','FH','MV','MM','MH','BV','BM','BH'];
+    const ZONE_ROWS = [
+      { cls: 'foran', name: 'Foran (nærmest scenen)' },
+      { cls: 'midten', name: 'Midten' },
+      { cls: 'bak', name: 'Bak' }
+    ];
+
+    async function showConcertDetail(perf) {
+      const band = perf.band;
+      const stageName = perf.stage || '';
+      const stageColor = stageMap[stageName] || 'storm';
+      const sub = `${stageShort[stageName] || stageName} · ${perf.start}–${perf.end}`;
+      const body = `
+        <div class="concert-desc">${(bandGenres[band] || []).join(' • ') || 'Konsert'}</div>
+        <div class="arena">
+          <div class="arena-stage">🎸 SCENE</div>
+          <div class="arena-glow"></div>
+          <div id="zonesWrap"><p style="color:#71717a;text-align:center;font-size:0.85rem;">Laster posisjoner…</p></div>
+        </div>
+        <div class="meet-toggle">
+          <div class="mt-text">✨ Møt meg her<small>Synlig kun her — markerer at du søker selskap</small></div>
+          <button class="meet-btn" id="meetBtn" disabled>AV</button>
+        </div>
+        <div class="arena-legend">Trykk en sone for å plassere deg (lagres med en gang). Trykk en boble for å se navn. ✨ = søker selskap.</div>
+      `;
+      const modal = showModal(band, sub, body);
+
+      if (!currentUser || localMode) {
+        document.getElementById('zonesWrap').innerHTML = '<p style="color:#fca5a5;text-align:center;font-size:0.85rem;">Logg på for å markere hvor du står.</p>';
+        return;
+      }
+
+      // Tilstand for denne konserten
+      let myPos = null;      // 0-8 eller null
+      let meetMe = false;
+      let others = [];       // [{user, pos, meet}]
+
+      // Hent eksisterende posisjoner for bandet
+      try {
+        const res = await fetch(`/api/positions?band=${encodeURIComponent(band)}`);
+        const data = await res.json();
+        (data.positions || []).forEach(p => {
+          if (p.user === currentUser) { myPos = p.pos; meetMe = p.meet; }
+          else others.push(p);
+        });
+      } catch (e) { /* nett nede — viser tomt kart */ }
+
+      const meetBtn = modal.querySelector('#meetBtn');
+      meetBtn.disabled = false;
+      function updateMeetBtn() {
+        meetBtn.textContent = meetMe ? 'PÅ ✨' : 'AV';
+        meetBtn.classList.toggle('on', meetMe);
+      }
+      updateMeetBtn();
+
+      // Sekvensiell lagring — unngår at raske klikk racer og overskriver hverandre
+      let saveChain = Promise.resolve();
+      let saveError = false;
+      function savePosition() {
+        saveChain = saveChain.then(async () => {
+          try {
+            const res = await fetch('/api/position', {
+              method: 'POST', headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ user: currentUser, band, pos: myPos, meet: meetMe })
+            });
+            if (!res.ok) throw new Error('status ' + res.status);
+            saveError = false;
+          } catch (e) {
+            saveError = true;
+            const wrap = document.getElementById('zonesWrap');
+            if (wrap) {
+              let warn = document.getElementById('posWarn');
+              if (!warn) {
+                warn = document.createElement('div');
+                warn.id = 'posWarn';
+                warn.style.cssText = 'color:#fca5a5;font-size:0.8rem;text-align:center;margin-top:0.5rem;';
+                wrap.parentElement.appendChild(warn);
+              }
+              warn.textContent = '⚠️ Fikk ikke lagret posisjonen — sjekk nett og prøv igjen.';
+            }
+          }
+        });
+        return saveChain;
+      }
+
+      function renderZones() {
+        const wrap = document.getElementById('zonesWrap');
+        if (!wrap) return;
+        let html = '';
+        for (let r = 0; r < 3; r++) {
+          html += `<div class="zone-side-label">${ZONE_ROWS[r].name}</div><div class="zone-row ${ZONE_ROWS[r].cls}">`;
+          for (let c = 0; c < 3; c++) {
+            const idx = r * 3 + c;
+            const mine = myPos === idx;
+            let bubs = '';
+            if (mine) bubs += `<span class="bub me ${meetMe ? 'seek' : ''}" data-name="Deg" data-seek="${meetMe}">DU</span>`;
+            others.filter(u => u.pos === idx).forEach(u => {
+              const init = computeInitials([u.user])[u.user];
+              bubs += `<span class="bub ${colorClass(u.user)} ${u.meet ? 'seek' : ''}" data-name="${u.user}" data-seek="${u.meet}">${init}</span>`;
+            });
+            html += `<div class="zone ${mine ? 'mine' : ''}" data-zone="${idx}"><span class="zone-tag">${ZONE_TAGS[idx]}</span>${bubs}</div>`;
+          }
+          html += `</div>`;
+        }
+        wrap.innerHTML = html;
+        // Fjern evt. gammel feilmelding ved ny handling
+        const oldWarn = document.getElementById('posWarn');
+        if (oldWarn && !saveError) oldWarn.remove();
+        // Klikk på sone → plasser meg (eller fjern meg om jeg klikker samme sone)
+        wrap.querySelectorAll('.zone').forEach(z => {
+          z.addEventListener('click', () => {
+            const idx = parseInt(z.dataset.zone);
+            if (myPos === idx) {
+              // Klikk på egen sone = forlat kartet
+              myPos = null;
+              meetMe = false;      // nullstill "møt meg" når du forlater
+              updateMeetBtn();
+            } else {
+              myPos = idx;
+            }
+            renderZones();
+            savePosition();
+          });
+        });
+        // Klikk på boble → vis navn
+        wrap.querySelectorAll('.bub').forEach(b => {
+          b.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const nm = b.dataset.name;
+            const seek = b.dataset.seek === 'true';
+            showModal(nm, 'På tribunen', `<p style="color:#d4d4d8;">${nm} står her${seek ? ' og <strong style="color:#fbbf24;">søker selskap ✨</strong>' : '.'}</p>`);
+          });
+        });
+      }
+      renderZones();
+
+      meetBtn.addEventListener('click', () => {
+        meetMe = !meetMe;
+        updateMeetBtn();
+        renderZones();
+        if (myPos !== null) {
+          savePosition();
+        } else if (meetMe) {
+          // Søker selskap, men står ingen steder ennå — be om sone først
+          let warn = document.getElementById('posWarn');
+          if (!warn) {
+            warn = document.createElement('div');
+            warn.id = 'posWarn';
+            warn.style.cssText = 'color:#fbbf24;font-size:0.8rem;text-align:center;margin-top:0.5rem;';
+            document.getElementById('zonesWrap').parentElement.appendChild(warn);
+          }
+          warn.textContent = '👆 Velg en sone først, så lagres «møt meg her».';
+        }
+      });
+    }
+
+    // ===== ADMIN =====
+    function showAdminModal() {
+      const body = `
+        <div class="form-field">
+          <label>Admin-passord</label>
+          <input type="password" id="adminPw" placeholder="passord" autocomplete="off">
+        </div>
+        <div id="adminStatus"></div>
+        <button class="modal-btn primary" id="adminLogin">Logg inn</button>
+        <p class="modal-note">Passordet ligger trygt i Netlify (ikke i koden).</p>
+      `;
+      const modal = showModal('🔒 Admin', 'Brukeradministrasjon', body);
+      const pw = modal.querySelector('#adminPw');
+      const status = modal.querySelector('#adminStatus');
+      pw.focus();
+      modal.querySelector('#adminLogin').addEventListener('click', async () => {
+        const password = pw.value;
+        if (!password) { status.innerHTML = '<div class="modal-status warn">Skriv inn passord.</div>'; return; }
+        status.innerHTML = '<div class="modal-status info">Henter brukere…</div>';
+        try {
+          const users = await fetchAllUsers();
+          renderAdminPanel(modal, password, users);
+        } catch (e) {
+          status.innerHTML = `<div class="modal-status warn">Feil: ${e.message}</div>`;
+        }
+      });
+    }
+
+    function renderAdminPanel(modal, password, users) {
+      const content = modal.querySelector('.modal-content');
+      const fmtDate = (d) => d ? new Date(d).toLocaleDateString('no-NO') : '–';
+      const items = users.map(u => `
+        <label class="pick-item">
+          <input type="checkbox" value="${u.name}">
+          <span class="pname">${u.name}</span>
+          <span class="pmeta">${u.count} fav · ${fmtDate(u.updated)}</span>
+        </label>`).join('');
+      content.innerHTML = `
+        <div class="warn-box">⚠️ Sletting kan ikke angres</div>
+        ${items || '<p style="color:#a1a1aa;">Ingen brukere.</p>'}
+        <div class="admin-bar">
+          <button class="modal-btn secondary" id="markAll" style="margin-top:0;">Merk alle</button>
+          <button class="modal-btn danger" id="delSelected" style="margin-top:0;">Slett valgte (0)</button>
+        </div>
+        <div id="adminResult"></div>
+
+        <div class="lineup-admin-section">
+          <h4>🎵 Rediger program</h4>
+          <input type="text" class="lineup-search" id="lineupSearch" placeholder="Søk etter band…">
+          <div id="lineupEditList"></div>
+          <button class="add-band-btn" id="addNewBandBtn">+ Legg til nytt band</button>
+          <button class="modal-btn secondary" id="resetLineupBtn" style="margin-top:0.6rem;">↺ Tilbakestill program til original</button>
+          <div id="lineupAdminResult"></div>
+        </div>
+      `;
+      const checks = () => [...content.querySelectorAll('input[type=checkbox]')];
+      const delBtn = content.querySelector('#delSelected');
+      const updateCount = () => { delBtn.textContent = `Slett valgte (${checks().filter(c => c.checked).length})`; };
+      checks().forEach(c => c.addEventListener('change', updateCount));
+      content.querySelector('#markAll').addEventListener('click', () => {
+        const allChecked = checks().every(c => c.checked);
+        checks().forEach(c => c.checked = !allChecked);
+        updateCount();
+      });
+      delBtn.addEventListener('click', async () => {
+        const selected = checks().filter(c => c.checked).map(c => c.value);
+        if (selected.length === 0) return;
+        if (!confirm(`Slette ${selected.length} bruker(e)? Kan ikke angres.`)) return;
+        content.querySelector('#adminResult').innerHTML = '<div class="modal-status info">Sletter…</div>';
+        try {
+          const res = await fetch('/api/admin-delete', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ password, users: selected })
+          });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error || 'Feil');
+          const remaining = await fetchAllUsers();
+          renderAdminPanel(modal, password, remaining);
+          modal.querySelector('#adminResult').innerHTML = `<div class="modal-status info">Slettet ${data.deleted} bruker(e).</div>`;
+        } catch (e) {
+          content.querySelector('#adminResult').innerHTML = `<div class="modal-status warn">Feil: ${e.message}</div>`;
+        }
+      });
+
+      // ===== Rediger program (band/tid/scene/sjanger/type) =====
+      renderLineupEditList(modal, password, '');
+      content.querySelector('#lineupSearch').addEventListener('input', (e) => {
+        renderLineupEditList(modal, password, e.target.value);
+      });
+      content.querySelector('#addNewBandBtn').addEventListener('click', () => {
+        openLineupEditForm(modal, password, null);
+      });
+      content.querySelector('#resetLineupBtn').addEventListener('click', async () => {
+        if (!confirm('Tilbakestille HELE programmet til original (alle 72 band)? Dine endringer forsvinner.')) return;
+        const resultEl = content.querySelector('#lineupAdminResult');
+        resultEl.innerHTML = '<div class="modal-status info">Tilbakestiller…</div>';
+        try {
+          const res = await fetch('/api/lineup', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ password, action: 'reset' })
+          });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error || 'Feil');
+          await loadLineup();
+          renderLineupEditList(modal, password, '');
+          render(); // oppdater synlig program i appen med en gang
+          resultEl.innerHTML = '<div class="modal-status info">✅ Tilbakestilt til original.</div>';
+        } catch (e) {
+          resultEl.innerHTML = `<div class="modal-status warn">Feil: ${e.message}</div>`;
+        }
+      });
+    }
+
+    // Viser den redigerbare bandlisten i admin-panelet (filtrert på søk)
+    function renderLineupEditList(modal, password, filter) {
+      const content = modal.querySelector('.modal-content');
+      const listEl = content.querySelector('#lineupEditList');
+      const f = (filter || '').toLowerCase();
+      const dotClass = { 'Scream Stage': 'dot-scream', 'Vampire Stage': 'dot-vampire', 'Moonlight Stage': 'dot-moonlight', 'The Storm Stage': 'dot-storm' };
+      const shown = currentFlatLineup
+        .filter(p => p.band.toLowerCase().includes(f))
+        .sort((a, b) => DAY_ORDER.indexOf(a.day) - DAY_ORDER.indexOf(b.day) || a.start.localeCompare(b.start));
+
+      listEl.innerHTML = shown.map(p => `
+        <div class="band-row">
+          <span class="stage-dot ${dotClass[p.stage] || 'dot-storm'}"></span>
+          <div class="binfo">
+            <div class="bname">${p.band}</div>
+            <div class="bmeta">${p.day} · ${stageShort[p.stage] || p.stage} · ${p.start}–${p.end}${p.type !== 'band' ? ' · ' + p.type : ''}</div>
+          </div>
+          <button class="row-btn edit" data-id="${p.id}" title="Rediger">✏️</button>
+          <button class="row-btn del" data-id="${p.id}" title="Slett">🗑️</button>
+        </div>
+      `).join('') || '<p style="color:#71717a; font-size:0.85rem; text-align:center; padding:0.7rem 0;">Ingen treff.</p>';
+
+      listEl.querySelectorAll('.row-btn.edit').forEach(b => {
+        b.addEventListener('click', () => openLineupEditForm(modal, password, b.dataset.id));
+      });
+      listEl.querySelectorAll('.row-btn.del').forEach(b => {
+        b.addEventListener('click', async () => {
+          const p = currentFlatLineup.find(x => x.id === b.dataset.id);
+          if (!p) return;
+          if (!confirm(`Slette «${p.band}»? Kan ikke angres.`)) return;
+          const resultEl = content.querySelector('#lineupAdminResult');
+          resultEl.innerHTML = '<div class="modal-status info">Sletter…</div>';
+          try {
+            const res = await fetch('/api/lineup', {
+              method: 'POST', headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ password, action: 'delete', id: p.id })
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || 'Feil');
+            await loadLineup();
+            renderLineupEditList(modal, password, content.querySelector('#lineupSearch').value);
+            render();
+            resultEl.innerHTML = `<div class="modal-status info">✅ «${p.band}» slettet.</div>`;
+          } catch (e) {
+            resultEl.innerHTML = `<div class="modal-status warn">Feil: ${e.message}</div>`;
+          }
+        });
+      });
+    }
+
+    // Åpner redigeringsskjema for én oppføring (id=null betyr nytt band)
+    function openLineupEditForm(modal, password, id) {
+      const isNew = !id;
+      const existing = isNew ? null : currentFlatLineup.find(p => p.id === id);
+      const p = existing || { id: null, band: '', day: 'Wednesday', stage: 'Scream Stage', start: '', end: '', genre: [], type: 'band' };
+      const typeLabels = { band: 'Band', annet: 'Standup', event: 'Fotballkamp' };
+
+      const overlay = document.createElement('div');
+      overlay.className = 'lineup-edit-overlay';
+      overlay.innerHTML = `
+        <div class="lineup-edit-modal">
+          <h3>${isNew ? '+ Legg til nytt band' : '✏️ Rediger ' + p.band}</h3>
+          <div class="lf-field">
+            <label>Bandnavn</label>
+            <input type="text" id="lf-band" value="${p.band}" placeholder="f.eks. Iron Maiden">
+          </div>
+          <div class="lf-row">
+            <div class="lf-field">
+              <label>Dag</label>
+              <select id="lf-day">${DAY_ORDER.map(d => `<option value="${d}" ${d===p.day?'selected':''}>${d}</option>`).join('')}</select>
+            </div>
+            <div class="lf-field">
+              <label>Scene</label>
+              <select id="lf-stage">${Object.keys(stageMap).map(s => `<option value="${s}" ${s===p.stage?'selected':''}>${stageShort[s]||s}</option>`).join('')}</select>
+            </div>
+          </div>
+          <div class="lf-row">
+            <div class="lf-field"><label>Starttid</label><input type="time" id="lf-start" value="${p.start}"></div>
+            <div class="lf-field"><label>Sluttid</label><input type="time" id="lf-end" value="${p.end}"></div>
+          </div>
+          <div class="lf-field">
+            <label>Sjanger (kommaseparert)</label>
+            <input type="text" id="lf-genre" value="${(p.genre||[]).join(', ')}" placeholder="f.eks. Heavy Metal, NWOBHM">
+          </div>
+          <div class="lf-field">
+            <label>Type</label>
+            <select id="lf-type">${Object.entries(typeLabels).map(([val, lbl]) => `<option value="${val}" ${val===p.type?'selected':''}>${lbl}</option>`).join('')}</select>
+          </div>
+          <button class="modal-btn primary" id="lfSave">💾 Lagre</button>
+          <button class="modal-btn secondary" id="lfCancel">Avbryt</button>
+          <div id="lfStatus" style="font-size:0.8rem; text-align:center; margin-top:0.5rem; min-height:1rem;"></div>
+        </div>
+      `;
+      document.body.appendChild(overlay);
+      overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+      overlay.querySelector('#lfCancel').addEventListener('click', () => overlay.remove());
+
+      overlay.querySelector('#lfSave').addEventListener('click', async () => {
+        const statusEl = overlay.querySelector('#lfStatus');
+        const band = overlay.querySelector('#lf-band').value.trim();
+        const start = overlay.querySelector('#lf-start').value;
+        const end = overlay.querySelector('#lf-end').value;
+        if (!band) { statusEl.innerHTML = '<span style="color:#fca5a5;">Bandnavn kan ikke være tomt.</span>'; return; }
+        if (!start || !end) { statusEl.innerHTML = '<span style="color:#fca5a5;">Fyll inn start- og sluttid.</span>'; return; }
+
+        const genre = overlay.querySelector('#lf-genre').value.split(',').map(s => s.trim()).filter(Boolean);
+        const performance = {
+          id: p.id, band,
+          day: overlay.querySelector('#lf-day').value,
+          stage: overlay.querySelector('#lf-stage').value,
+          start, end, genre,
+          type: overlay.querySelector('#lf-type').value
+        };
+
+        statusEl.innerHTML = '<span style="color:#a1a1aa;">Lagrer…</span>';
+        try {
+          const res = await fetch('/api/lineup', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ password, action: 'upsert', performance })
+          });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error || 'Feil');
+          await loadLineup();
+          render(); // oppdater synlig program i appen med en gang
+          const modalRef = document.querySelector('.modal-overlay .modal-content #lineupEditList')?.closest('.modal-overlay');
+          if (modalRef) renderLineupEditList(modalRef, password, modalRef.querySelector('#lineupSearch').value);
+          statusEl.innerHTML = '<span style="color:#4ade80;">✅ Lagret!</span>';
+          setTimeout(() => overlay.remove(), 500);
+        } catch (e) {
+          statusEl.innerHTML = `<span style="color:#fca5a5;">Feil: ${e.message}</span>`;
+        }
+      });
+    }
+
+    // ===== OPPSTART =====
+    async function startup() {
+      await loadLineup(); // henter programmet (band/tid/scene) før noe vises
+      renderUserBar();
+      render();
+      const saved = getStoredUser();
+      if (saved) {
+        // Husker deg fra sist — logg automatisk på
+        try {
+          await loginUser(saved);
+          renderUserBar(); render();
+          if (showFriendsOnCards) { await buildBandCounts(); render(); }
+        }
+        catch (e) { startLocalMode(); renderUserBar(); }
+      } else {
+        // Første gang — vis innloggingsvalg (appen funker lokalt uansett)
+        showLoginModal();
+      }
+    }
+
+    startup();
+  </script>
 </body>
 </html>
