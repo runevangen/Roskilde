@@ -1,14 +1,19 @@
 [build]
-  command = "echo 'Static deploy'"
+  command = "echo 'Static deploy - Roskilde 2026'"
   publish = "."
-
-[env]
-  ADMIN_PASSWORD = "rock"
 
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
 
+[env]
+  ADMIN_PASSWORD = "rock"
+  NODE_VERSION = "18.0.0"
+
 [context.production]
   environment = { ADMIN_PASSWORD = "rock" }
+
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"
