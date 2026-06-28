@@ -375,11 +375,11 @@
       if (btn) btn.textContent = light ? '☀️' : '🌙';
     }
     function loadTheme() {
-      try { return localStorage.getItem('tor_theme') || 'dark'; } catch (e) { return 'dark'; }
+      try { return localStorage.getItem('rf_theme') || 'dark'; } catch (e) { return 'dark'; }
     }
     function toggleTheme() {
       const next = document.body.classList.contains('light') ? 'dark' : 'light';
-      try { localStorage.setItem('tor_theme', next); } catch (e) {}
+      try { localStorage.setItem('rf_theme', next); } catch (e) {}
       applyTheme(next);
     }
     applyTheme(loadTheme());
@@ -394,119 +394,25 @@
       });
     }
     function loadSize() {
-      try { return parseInt(localStorage.getItem('tor_textsize')) || 1; } catch (e) { return 1; }
+      try { return parseInt(localStorage.getItem('rf_textsize')) || 1; } catch (e) { return 1; }
     }
     function setSize(level) {
-      try { localStorage.setItem('tor_textsize', level); } catch (e) {}
+      try { localStorage.setItem('rf_textsize', level); } catch (e) {}
       applySize(level);
     }
     applySize(loadSize());
 
-    const APP_VERSION = 'v2.9.0-beta';
-    const APP_BUILD = '2026-06-26';
+    const APP_VERSION = 'v1.0.0-beta';
+    const APP_BUILD = '2026-06-28';
     const CHANGELOG = [
-      { version: 'v2.9.0-beta', date: '2026-06-26', changes: [
-        'NYTT: admin kan redigere band, tid, scene, sjanger og type direkte i appen',
-        'Programmet lagres nå i skyen i stedet for i koden — endringer er live umiddelbart',
-        'Legg til / slett oppføringer + «Tilbakestill til original» som sikkerhetsnett',
-        'Søk i bandlisten i admin-panelet'
-      ]},
-      { version: 'v2.8.2-beta', date: '2026-06-26', changes: [
-        'Lyst tema: dag-boksen over lista er nå lys (var mørk)'
-      ]},
-      { version: 'v2.8.1-beta', date: '2026-06-26', changes: [
-        'Fikset bandnavn som brøt loddrett ved stor tekst',
-        'Knapper (📍 LFM ♪) flyttet til egen rad så navnet får full bredde'
-      ]},
-      { version: 'v2.8.0-beta', date: '2026-06-26', changes: [
-        'Tekststørrelse-bryter (A/A/A) — Normal, Stor, Størst',
-        'Knapper og trykkflater vokser også, ikke bare teksten',
-        'Valget huskes til neste gang'
-      ]},
-      { version: 'v2.7.1-beta', date: '2026-06-26', changes: [
-        'Lyst tema: rettet dag-knapper og markering av valgt dag',
-        'Aktiv scene/favoritt-knapp vises nå riktig i lyst tema'
-      ]},
-      { version: 'v2.7.0-beta', date: '2026-06-26', changes: [
-        'Lyst «varm sand»-tema for bedre lesbarhet i festivalsola',
-        'Tema-bryter (☀️/🌙) øverst til høyre — valget huskes'
-      ]},
-      { version: 'v2.6.1-beta', date: '2026-06-26', changes: [
-        'Lineup: The Hellacopters erstatter Tom Morello (fredag, avlyst)',
-        'Fikset lagring av tribune-posisjon ved rask flytting',
-        'Tydelig feilmelding hvis posisjon ikke lagres',
-        '«Møt meg her» ber deg velge sone først'
-      ]},
-      { version: 'v2.6.0-beta', date: '2026-06-25', changes: [
-        'NYTT: tribune-kart — marker hvor du står på hver konsert (📍-knapp)',
-        'Se hvor vennegjengen står på et arena-kart sett ovenfra',
-        '«Møt meg her ✨» for å vise at du søker selskap (kun synlig i kartet)',
-        'Live-lagring — flytt deg ved å trykke en ny sone'
-      ]},
-      { version: 'v2.5.0-beta', date: '2026-06-25', changes: [
-        'Tilfeldig overskrift over venne-pillene — ny hver gang du åpner appen',
-        '12 varianter (Folket har talt, Gjengen som stiller, Rock on! m.fl.)'
-      ]},
-      { version: 'v2.4.1-beta', date: '2026-06-25', changes: [
-        'Joan Jett and the Blackhearts ? erstatter Yungblud (fredag, avlyst)',
-        '«?» markerer at nøyaktig spilletid ikke er bekreftet ennå'
-      ]},
-      { version: 'v2.4.0-beta', date: '2026-06-24', changes: [
-        'Stjerne flyttet til venstre for bandnavnet',
-        'LFM/Spotify-knapper øverst til høyre, begge i rolig mørk stil',
-        'Fjernet stort klokkeslett (tiden står fortsatt i meta-linja)',
-        'Fikset «+N andre» som feilaktig talte deg selv'
-      ]},
-      { version: 'v2.3.0-beta', date: '2026-06-24', changes: [
-        '«Favoritter til:» nederst med fulle navn (fornavn-piller)',
-        'Over 10 venner vises som «+N andre»',
-        'Logg ut-knapp i brukerbaren'
-      ]},
-      { version: 'v2.2.0-beta', date: '2026-06-24', changes: [
-        'Appen husker deg fra sist — automatisk pålogging',
-        'Egen «Opprett ny bruker» med duplikatsjekk',
-        'Under 15 brukere er alle automatisk venner (advarsel ved nr. 16)',
-        'Venner vises PÅ som standard',
-        'LFM-knapp (Last.fm) ved siden av Spotify-knapp'
-      ]},
-      { version: 'v2.1.0-beta', date: '2026-06-24', changes: [
-        'Venner fra liste, «Favoritter til:» med initialer + totaltall',
-        'Admin-panel i footer for å rydde brukere'
-      ]},
-      { version: 'v2.0.0-beta', date: '2026-06-24', changes: [
-        'FLERBRUKER: favoritter i skyen under brukernavn, lokal fallback'
-      ]},
-      { version: 'v1.7.0', date: '2026-06-24', changes: [
-        'Ryddet OCR-feil i bandnavn mot offisiell lineup',
-        'Alle 72 navn verifisert mot festivalens program'
-      ]},
-      { version: 'v1.6.0', date: '2026-06-24', changes: [
-        'Klikkbart versjonsnummer med full endringslogg',
-        'Rettet bandnavn: Angel → Angell, med riktig sjanger'
-      ]},
-      { version: 'v1.5.0', date: '2026-06-24', changes: [
-        'Rettet rådatafeil: Evanscene → Grandson på Moonlight torsdag',
-        'Storm Stage: skiller nå band fra standup/scene (annenhver)',
-        'Rettet OCR-feil: Die Spitz, Imminence, Dumdum Boys, Mørk Medisin m.fl.'
-      ]},
-      { version: 'v1.4.0', date: '2026-06-24', changes: [
-        'Segmentert scene-filter — alle scener på én linje uten scrolling',
-        'Kompakt scene-tag på kortene'
-      ]},
-      { version: 'v1.3.0', date: '2026-06-24', changes: [
-        'Favoritter: stjernemerk band og se dem på tvers av alle dager',
-        'Favoritter lagres lokalt og overlever omstart'
-      ]},
-      { version: 'v1.2.0', date: '2026-06-24', changes: [
-        'Compare bruker nå Last.fm for ekte lignende artister med match-prosent',
-        'Norge–Frankrike merket som fotball-event (ikke band)'
-      ]},
-      { version: 'v1.1.0', date: '2026-06-24', changes: [
-        'Lagt til iOS hjemskjerm-støtte (fullskjerm-app)',
-        'Verifiserte topplåter med Spotify-lenker'
-      ]},
-      { version: 'v1.0.0', date: '2026-06-24', changes: [
-        'Første versjon: program for alle fire dager, scene-filter, sjangre'
+      { version: 'v1.0.0-beta', date: '2026-06-28', changes: [
+        'Første versjon av Roskilde 2026-appen',
+        'Bygget på samme arkitektur som Tons of Rock-appen',
+        'Program for alle 7 festivaldager (28. juni – 4. juli)',
+        '12 scener: Orange Scene, Arena, Lagune, Eos, m.fl.',
+        'Favoritter i skyen under brukernavn, lokal fallback',
+        'Venneliste, tribune-kart og «Møt meg her»',
+        'Admin-panel for å redigere program direkte i appen'
       ]}
     ];
     // ============================================================
@@ -516,51 +422,29 @@
     let bandGenres = {};
 
     const popularTracks = {
-      'Iron Maiden': ['The Trooper', 'Run to the Hills', 'Hallowed Be Thy Name', 'Fear of the Dark', 'The Number of the Beast'],
-      'Anthrax': ['Madhouse', 'Indians', 'Caught in a Mosh', 'Antisocial', 'Got the Time'],
-      'Alice Cooper': ['School\'s Out', 'Poison', 'No More Mr. Nice Guy', 'I\'m Eighteen', 'Feed My Frankenstein'],
-      'Apocalyptica': ['Nothing Else Matters', 'Hall of the Mountain King', 'I Don\'t Care', 'Path', 'Seek & Destroy'],
-      'Behemoth': ['O Father O Satan O Sun!', 'Conquer All', 'Ov Fire and the Void', 'Bartzabel', 'Chant for Eschaton 2000'],
-      'A Perfect Circle': ['Judith', 'The Outsider', 'The Hollow', '3 Libras', 'Weak and Powerless'],
-      'D-A-D': ['Sleeping My Day Away', 'Grow or Pay', 'Bad Craziness', 'Laugh \'n\' a 1/2', 'Jihad'],
-      'The Offspring': ['You\'re Gonna Go Far, Kid', 'The Kids Aren\'t Alright', 'Pretty Fly (For a White Guy)', 'Self Esteem', 'Come Out and Play'],
-      'Babymetal': ['Gimme Chocolate!!', 'KARATE', 'PA PA YA!!', 'Megitsune', 'Road of Resistance'],
-      'Suicidal Tendencies': ['Institutionalized', 'You Can\'t Bring Me Down', 'War Inside My Head', 'Pledge Your Allegiance', 'Possessed to Skate'],
-      'Black Label Society': ['Stillborn', 'In This River', 'Bleed for Me', 'Suicide Messiah', 'Concrete Jungle'],
-      'Leprous': ['The Sky Is Red', 'Slave', 'Below', 'From the Flame', 'The Price'],
-      'Avatar': ['Hail the Apocalypse', 'Smells Like a Freakshow', 'The Eagle Has Landed', 'Bloody Angel', 'A Statue of the King'],
-      'Queensrÿche': ['Silent Lucidity', 'Eyes of a Stranger', 'Jet City Woman', 'Empire', 'Queen of the Reich'],
-      'Cavalera': ['Roots Bloody Roots', 'Refuse/Resist', 'Territory', 'Attitude', 'Troops of Doom'],
-      'Rival Sons': ['Pressure and Time', 'Open My Eyes', 'Do Your Worst', 'Electric Man', 'Keep On Swinging'],
-      'Pain': ['Shut Your Mouth', 'End of the Line', 'Same Old Song', 'Dancing With the Dead', 'Designed to Piss You Off'],
-      'Accept': ['Balls to the Wall', 'Fast as a Shark', 'Metal Heart', 'Princess of the Dawn', 'Restless and Wild'],
-      'Sepultura': ['Roots Bloody Roots', 'Refuse/Resist', 'Territory', 'Arise', 'Ratamahatta'],
-      'Elder': ['Sanctuary', 'Dead Roots Stirring', 'Lore', 'Compendium', 'The Falling Veil'],
-      'The Hives': ['Hate to Say I Told You So', 'Tick Tick Boom', 'Walk Idiot Walk', 'Main Offender', 'Come On!'],
-      'Eivør': ['Trøllabundin', 'Falling Free', 'Tròdlabùndin', 'Salt', 'Mín móðir'],
-      'The Hellacopters': ['By the Grace of God', 'I Am Just a Lonesome Highway', 'No Song Unheard', 'Carry Me Home', 'Gotta Get Some Action'],
-      'Bring Me The Horizon': ['Can You Feel My Heart', 'Throne', 'Drown', 'Doomed', 'Kingslayer'],
-      'Dumdum Boys': ['Splitter Pine', 'Enkeltbillett', 'Vredens Dag', 'Marsboern', 'Tyven, tyven'],
-      'Raga Rockers': ['Noen å hate', 'Hun er fri', 'Fanden, Fanden', 'Terrorister', 'Vil ha deg'],
-      'Joan Jett and the Blackhearts ?': ['I Love Rock n Roll', 'Bad Reputation', 'I Hate Myself for Loving You', 'Crimson and Clover', 'Cherry Bomb'],
-      'Mayhem': ['Freezing Moon', 'De Mysteriis Dom Sathanas', 'Pure Fucking Armageddon', 'Funeral Fog', 'Deathcrush'],
-      'Audrey Horne': ['Pretty Hate Machine', 'Redemption Blues', 'This Is War', 'Out of the City', 'Light Your Way'],
-      'Limp Bizkit': ['Break Stuff', 'Rollin\'', 'My Way', 'Take a Look Around', 'Nookie'],
-      'Possessed': ['Death Metal', 'The Exorcist', 'Pentagram', 'Burning in Hell', 'Fallen Angel'],
-      'Gatecreeper': ['Sweltering Madness', 'Boiled Over', 'Puncture Wounds', 'Emptiness', 'Sterilized'],
-      'Blood Red Throne': ['Soulseller', 'Affiliated With the Suffering', 'Mary Whispers of Death', 'Deatholy', 'Dödsskrik'],
-      'Death To All': ['Pull the Plug', 'Crystal Mountain', 'Lack of Comprehension', 'Spirit Crusher', 'Symbolic'],
-      'Blood Incantation': ['The Giza Power Plant', 'Inner Paths', 'Hidden Species', 'Slave Species of the Gods', 'Awakening'],
-      'Kublai Khan TX': ['Antpile', 'Self-Harm', 'B.A.U.', 'The Hammer', 'No Kin'],
-      'The Funeral Portrait': ['Holy Water', 'Voodoo Doll', 'Alibi', 'Suffocate City', 'Bones'],
-      'Black Debbath': ['Naar Tyfusen Herjet', 'Storeslem i Slekta', 'Pizza & Pils', 'Lro', 'Hard Rock Ferie'],
-      'The Carburetors': ['Hard Rock', 'Rock'],
-      'The Baboon Show': ['People You Should Know', 'Don\'t Give a Damn About You', 'Radio Rebelde', 'My Plan', 'Channel by Channel'],
-      'PaleFace Swiss': ['Please End Me', 'Lifeline', 'Hatred', 'Wenn Die Sonne Erlischt', 'Gates of Zion'],
-      'Yonaka': ['Rockstar', 'Seize the Power', 'Punch Bag', 'Creature', 'Ordinary'],
-      'The Warning': ['Choke', 'Evolve', 'MORE', 'Money', 'Hell You Call a Dream'],
-      'Imminence': ['The Sickness', 'Heaven Shall Burn', 'Paralyzed', 'Ophidian', 'Come Hell or High Water'],
-      'Dogstar': ['Everything Turns Around', 'Glimmer', 'Breach', 'How the Story Ends', 'Sleep']
+      'The Cure': ['Friday I\'m in Love', 'Boys Don\'t Cry', 'Just Like Heaven', 'Lovesong', 'Close to Me'],
+      'Gorillaz': ['Feel Good Inc.', 'Clint Eastwood', 'On Melancholy Hill', 'Rhinestone Eyes', 'New Gold'],
+      'Kendrick Lamar': ['HUMBLE.', 'Not Like Us', 'DNA.', 'Money Trees', 'LOVE.'],
+      'Jennie': ['Mantra', 'like JENNIE', 'ZEN', 'ExtraL', 'Handlebars'],
+      'Addison Rae': ['Diet Pepsi', 'Aquamarine', 'Headphones On', '2 die 4', 'High Fashion'],
+      'Zara Larsson': ['Lush Life', 'Never Forget You', 'Symphony', 'Ruin My Life', 'Words'],
+      'Lily Allen': ['Smile', 'Fuck You', 'The Fear', 'Not Fair', 'LDN'],
+      'Wolf Alice': ['Don\'t Delete the Kisses', 'Bros', 'Moaning Lisa Smile', 'The Last Man on Earth', 'Silk'],
+      'Ethel Cain': ['American Teenager', 'A House in Nebraska', 'Crush', 'Strangers', 'Gibson Girl'],
+      'Little Simz': ['Introvert', 'Woman', 'Gorilla', 'Venom', 'Point and Kill'],
+      'Clipse': ['Grindin\'', 'Mr. Me Too', 'Wamp Wamp', 'Ace Trumpets', 'When the Last Time'],
+      'David Byrne': ['Once in a Lifetime', 'This Must Be the Place', 'Psycho Killer', 'Burning Down the House', 'Road to Nowhere'],
+      'Rosalía': ['Despechá', 'TKN', 'MALAMENTE', 'BIZCOCHITO', 'Con Altura'],
+      'YOUNG MIKO': ['Lisa', 'Classy 101', 'id', 'Wassup', 'Curita'],
+      'Bad Gyal': ['Fiebre', 'Zorra', 'Chulo', 'Hookah', 'Aprende a Disfrutar'],
+      'Kneecap': ['Get Your Brits Out', 'H.O.O.D', 'Better Way to Live', 'C.E.A.R.T.A', 'Sick in the Head'],
+      'Napalm Death': ['You Suffer', 'Scum', 'Suffer the Children', 'Nazi Punks Fuck Off', 'Multinational Corporations'],
+      'Peggy Gou': ['(It Goes Like) Nanana', 'Starry Night', 'I Go', 'It Makes You Forget', 'Han Jan'],
+      'Arca': ['Nonbinary', 'Time', 'Mequetrefe', 'KLK', 'Prada'],
+      'Audrey Nuna': ['damn Right', 'Comic Sans', 'Space', 'Locked', 'Paper'],
+      'Liniker': ['Baby 95', 'Zero', 'Veludo Marrom', 'Tua', 'Não Tem Tempo Ruim'],
+      'Ozzy': ['Crazy Train', 'Mr. Crowley', 'No More Tears', 'Mama, I\'m Coming Home', 'Bark at the Moon'],
+      'Pa Salieu': ['Frontline', 'Block Boy', 'My Family', 'Energy', 'B***K']
     };
 
     // Programmet hentes nå fra /api/lineup (Netlify Blobs) ved oppstart,
@@ -576,7 +460,7 @@
     // Reserve-kopi av programmet (samme data som ligger i Netlify Blobs ved
     // første oppstart). Brukes BARE hvis /api/lineup ikke svarer, så appen
     // aldri viser en blank liste pga. nettverksfeil.
-    const FALLBACK_LINEUP = [{"id":"r001","band":"Ozzy","day":"Sunday","stage":"Eos","start":"14:15","end":"15:45","genre":["Metal"],"type":"band"},{"id":"r002","band":"The Cure","day":"Monday","stage":"Orange Scene","start":"22:00","end":"23:30","genre":["Post-Punk","New Wave"],"type":"band"},{"id":"r003","band":"Gorillaz","day":"Tuesday","stage":"Orange Scene","start":"22:00","end":"23:30","genre":["Alternative","Electronic"],"type":"band"},{"id":"r004","band":"Kendrick Lamar","day":"Friday","stage":"Orange Scene","start":"21:00","end":"22:30","genre":["Hip-Hop","Rap"],"type":"band"},{"id":"r005","band":"Wolf Alice","day":"Monday","stage":"Orange Scene","start":"20:00","end":"21:30","genre":["Indie Rock","Alternative"],"type":"band"},{"id":"r006","band":"Addison Rae","day":"Wednesday","stage":"Orange Scene","start":"19:00","end":"20:00","genre":["Pop"],"type":"band"},{"id":"r007","band":"Jennie","day":"Wednesday","stage":"Orange Scene","start":"21:00","end":"22:00","genre":["K-Pop","Pop"],"type":"band"},{"id":"r008","band":"Zara Larsson","day":"Thursday","stage":"Orange Scene","start":"14:00","end":"15:00","genre":["Pop"],"type":"band"},{"id":"r009","band":"Lily Allen","day":"Thursday","stage":"Orange Scene","start":"20:45","end":"21:45","genre":["Pop","Alternative"],"type":"band"},{"id":"r010","band":"Clipse","day":"Thursday","stage":"Orange Scene","start":"18:30","end":"19:30","genre":["Hip-Hop","Rap"],"type":"band"},{"id":"r011","band":"TV-2","day":"Thursday","stage":"Orange Scene","start":"16:00","end":"17:00","genre":["Rock"],"type":"band"},{"id":"r012","band":"Little Simz","day":"Tuesday","stage":"Orange Scene","start":"18:00","end":"19:00","genre":["Hip-Hop","Rap"],"type":"band"},{"id":"r013","band":"Malk De Koijn","day":"Tuesday","stage":"Orange Scene","start":"16:00","end":"17:00","genre":["Rock"],"type":"band"},{"id":"r014","band":"Joshua Idehen","day":"Monday","stage":"Eos","start":"18:00","end":"19:00","genre":["Rock"],"type":"band"},{"id":"r015","band":"Pa Salieu","day":"Monday","stage":"Arena","start":"15:00","end":"16:00","genre":["Hip-Hop"],"type":"band"},{"id":"r016","band":"Kneecap","day":"Monday","stage":"Arena","start":"17:00","end":"18:00","genre":["Punk","Hip-Hop"],"type":"band"},{"id":"r017","band":"Napalm Death","day":"Monday","stage":"Arena","start":"19:00","end":"20:00","genre":["Grindcore","Death Metal"],"type":"band"},{"id":"r018","band":"Ponny","day":"Sunday","stage":"Lagune","start":"15:00","end":"16:00","genre":["Electronic","Dance"],"type":"band"},{"id":"r019","band":"DJ Seinfeld","day":"Sunday","stage":"Lagune","start":"16:30","end":"17:30","genre":["House","Electronic"],"type":"band"},{"id":"r020","band":"Peggy Gou","day":"Sunday","stage":"Lagune","start":"18:30","end":"19:30","genre":["House","Techno"],"type":"band"},{"id":"r021","band":"Arca","day":"Thursday","stage":"Dancefloor","start":"20:00","end":"21:00","genre":["Electronic","Avant-Garde"],"type":"band"},{"id":"r022","band":"Ethel Cain","day":"Wednesday","stage":"Arena","start":"19:00","end":"20:00","genre":["Alternative","Indie"],"type":"band"},{"id":"r023","band":"Bad Gyal","day":"Wednesday","stage":"Arena","start":"15:00","end":"16:00","genre":["Trap","Reggaeton"],"type":"band"},{"id":"r024","band":"Liniker","day":"Wednesday","stage":"Arena","start":"17:00","end":"18:00","genre":["Soul","Pop"],"type":"band"},{"id":"r025","band":"David Byrne","day":"Wednesday","stage":"Arena","start":"19:30","end":"20:30","genre":["Rock","World"],"type":"band"},{"id":"r026","band":"Rosalía","day":"Friday","stage":"Orange Scene","start":"18:00","end":"19:00","genre":["Flamenco Fusion","Pop"],"type":"band"},{"id":"r027","band":"YOUNG MIKO","day":"Wednesday","stage":"Orange Scene","start":"17:00","end":"18:00","genre":["Trap","Latin"],"type":"band"},{"id":"r028","band":"Mille","day":"Wednesday","stage":"Arena","start":"13:00","end":"14:00","genre":["Metal"],"type":"band"},{"id":"r029","band":"MAS","day":"Thursday","stage":"Arena","start":"12:00","end":"13:00","genre":["Rock"],"type":"band"},{"id":"r030","band":"Audrey Nuna","day":"Thursday","stage":"Arena","start":"14:00","end":"15:00","genre":["Hip-Hop","Rap"],"type":"band"},{"id":"r031","band":"Flow Yoga","day":"Sunday","stage":"The Yard","start":"09:00","end":"10:00","genre":["Wellness"],"type":"activity"},{"id":"r032","band":"GO MORGEN ROSKILDE","day":"Sunday","stage":"Stadion","start":"10:00","end":"11:00","genre":["Workout"],"type":"activity"},{"id":"r033","band":"Roller Disco","day":"Sunday","stage":"Skate","start":"18:00","end":"19:00","genre":["Activity"],"type":"activity"},{"id":"r034","band":"HEDESTRIK X NORDISK DANS","day":"Sunday","stage":"Dancefloor","start":"13:00","end":"14:00","genre":["Dance","Art"],"type":"art"},{"id":"r035","band":"RIXPOET","day":"Sunday","stage":"Re:Act","start":"16:00","end":"17:00","genre":["Poetry","Art"],"type":"art"},{"id":"r036","band":"Wake up with the garden","day":"Sunday","stage":"Grow","start":"10:00","end":"11:00","genre":["Workshop"],"type":"activity"},{"id":"r037","band":"Film screening","day":"Sunday","stage":"Cinema","start":"15:00","end":"17:00","genre":["Film"],"type":"film"},{"id":"r038","band":"Rehearsals of Belonging","day":"Wednesday","stage":"Rehearsals of Belonging","start":"12:30","end":"13:30","genre":["Performance","Art"],"type":"art"}];
+    const FALLBACK_LINEUP = [{"id":"r001","band":"Ozzy","day":"Sunday","stage":"Eos","start":"14:15","end":"15:15","genre":["Metal"],"type":"band"},{"id":"r002","band":"Carlina de Place","day":"Sunday","stage":"Eos","start":"15:45","end":"16:45","genre":["Pop"],"type":"band"},{"id":"r003","band":"Ana Juél","day":"Sunday","stage":"Eos","start":"17:30","end":"18:30","genre":["Pop"],"type":"band"},{"id":"r004","band":"Grande Mahogany","day":"Sunday","stage":"Eos","start":"19:00","end":"20:00","genre":["Hip-Hop"],"type":"band"},{"id":"r005","band":"Kōya","day":"Sunday","stage":"Eos","start":"20:30","end":"21:30","genre":["Electronic"],"type":"band"},{"id":"r006","band":"Smøgmænd","day":"Sunday","stage":"Eos","start":"22:15","end":"23:15","genre":["Rock"],"type":"band"},{"id":"r007","band":"Miaw","day":"Sunday","stage":"Eos","start":"23:45","end":"00:45","genre":["Electronic"],"type":"band"},{"id":"r008","band":"Ponny","day":"Sunday","stage":"Lagune","start":"15:00","end":"16:00","genre":["Electronic"],"type":"band"},{"id":"r009","band":"Portal Pets","day":"Sunday","stage":"Lagune","start":"16:30","end":"17:30","genre":["Electronic"],"type":"band"},{"id":"r010","band":"Oskar Witt","day":"Sunday","stage":"Lagune","start":"18:15","end":"19:15","genre":["Pop"],"type":"band"},{"id":"r011","band":"Spawner","day":"Sunday","stage":"Lagune","start":"19:45","end":"20:45","genre":["Electronic"],"type":"band"},{"id":"r012","band":"SCAM","day":"Sunday","stage":"Lagune","start":"21:15","end":"22:15","genre":["Punk"],"type":"band"},{"id":"r013","band":"Club Live","day":"Sunday","stage":"Lagune","start":"23:00","end":"00:00","genre":["Electronic"],"type":"band"},{"id":"r014","band":"Flow Yoga","day":"Sunday","stage":"Stadion","start":"09:00","end":"10:00","genre":["Wellness"],"type":"activity"},{"id":"r015","band":"Roller Disco","day":"Sunday","stage":"Skate","start":"18:15","end":"19:15","genre":["Activity"],"type":"activity"},{"id":"r016","band":"Wake up with the garden","day":"Sunday","stage":"Grow","start":"10:00","end":"11:00","genre":["Workshop"],"type":"activity"},{"id":"r017","band":"The Tender Revolution","day":"Sunday","stage":"Cinema","start":"11:00","end":"13:00","genre":["Film"],"type":"film"},{"id":"r018","band":"Sinners (2025)","day":"Sunday","stage":"Cinema","start":"23:00","end":"01:00","genre":["Film"],"type":"film"},{"id":"r019","band":"RIXPOET","day":"Sunday","stage":"Re:Act","start":"16:00","end":"17:00","genre":["Poetry"],"type":"art"},{"id":"r101","band":"Pil","day":"Wednesday","stage":"Orange Scene","start":"17:30","end":"18:30","genre":["Pop"],"type":"band"},{"id":"r102","band":"Wolf Alice","day":"Wednesday","stage":"Orange Scene","start":"19:30","end":"20:45","genre":["Indie Rock","Alternative"],"type":"band"},{"id":"r103","band":"The Cure","day":"Wednesday","stage":"Orange Scene","start":"22:00","end":"00:00","genre":["Post-Punk","New Wave"],"type":"band"},{"id":"r104","band":"Pa Salieu","day":"Wednesday","stage":"Arena","start":"18:30","end":"19:30","genre":["Hip-Hop"],"type":"band"},{"id":"r105","band":"Jade","day":"Wednesday","stage":"Arena","start":"20:45","end":"21:45","genre":["Pop"],"type":"band"},{"id":"r106","band":"EsDeeKid","day":"Wednesday","stage":"Arena","start":"00:00","end":"01:00","genre":["Hip-Hop"],"type":"band"},{"id":"r107","band":"Sherelle","day":"Wednesday","stage":"Arena","start":"00:00","end":"01:30","genre":["Electronic","Jungle"],"type":"band"},{"id":"r108","band":"Joshua Idehen","day":"Wednesday","stage":"Gloria","start":"17:30","end":"18:30","genre":["Spoken Word"],"type":"band"},{"id":"r109","band":"Hypnosis Therapy","day":"Wednesday","stage":"Gloria","start":"19:30","end":"20:30","genre":["Electronic"],"type":"band"},{"id":"r110","band":"Indus","day":"Wednesday","stage":"Gloria","start":"21:30","end":"22:30","genre":["Electronic"],"type":"band"},{"id":"r111","band":"Dying Wish","day":"Wednesday","stage":"Gloria","start":"23:30","end":"00:30","genre":["Metalcore"],"type":"band"},{"id":"r112","band":"Tuvaband","day":"Wednesday","stage":"Fauna","start":"17:45","end":"18:45","genre":["Indie"],"type":"band"},{"id":"r113","band":"Smertegrænsens Toldere","day":"Wednesday","stage":"Fauna","start":"19:30","end":"20:30","genre":["Rock"],"type":"band"},{"id":"r114","band":"The Sophs","day":"Wednesday","stage":"Fauna","start":"21:00","end":"22:00","genre":["Rock"],"type":"band"},{"id":"r115","band":"Annie & the Caldwells","day":"Wednesday","stage":"Lagune","start":"18:30","end":"19:30","genre":["Gospel","Soul"],"type":"band"},{"id":"r116","band":"ANGÅENDE MIG","day":"Wednesday","stage":"Lagune","start":"20:30","end":"21:30","genre":["Pop"],"type":"band"},{"id":"r117","band":"Marwan Moussa","day":"Wednesday","stage":"Lagune","start":"22:30","end":"23:30","genre":["Hip-Hop"],"type":"band"},{"id":"r118","band":"Primitive Man","day":"Wednesday","stage":"Lagune","start":"00:30","end":"01:30","genre":["Doom Metal"],"type":"band"},{"id":"r119","band":"BIA","day":"Wednesday","stage":"Eos","start":"17:00","end":"18:00","genre":["Hip-Hop"],"type":"band"},{"id":"r120","band":"Sama' Abdulhadi","day":"Wednesday","stage":"Eos","start":"20:30","end":"22:00","genre":["Techno"],"type":"band"},{"id":"r121","band":"SMAG PÅ DIG SELV","day":"Wednesday","stage":"Eos","start":"23:30","end":"00:30","genre":["Electronic"],"type":"band"},{"id":"r122","band":"¥ØU$UK€ ¥UK1MAT$U","day":"Wednesday","stage":"Eos","start":"01:30","end":"02:30","genre":["Electronic"],"type":"band"},{"id":"r201","band":"Malk De Koijn","day":"Thursday","stage":"Orange Scene","start":"16:00","end":"17:00","genre":["Hip-Hop"],"type":"band"},{"id":"r202","band":"Little Simz","day":"Thursday","stage":"Orange Scene","start":"18:00","end":"19:00","genre":["Hip-Hop","Rap"],"type":"band"},{"id":"r203","band":"Gorillaz","day":"Thursday","stage":"Orange Scene","start":"22:00","end":"23:45","genre":["Alternative","Electronic"],"type":"band"},{"id":"r204","band":"Tobias Rahim","day":"Thursday","stage":"Orange Scene","start":"01:00","end":"02:00","genre":["Pop"],"type":"band"},{"id":"r205","band":"Guldimund","day":"Thursday","stage":"Arena","start":"14:30","end":"15:30","genre":["Folk"],"type":"band"},{"id":"r206","band":"Royel Otis","day":"Thursday","stage":"Arena","start":"17:00","end":"18:00","genre":["Indie Rock"],"type":"band"},{"id":"r207","band":"Ethel Cain","day":"Thursday","stage":"Arena","start":"19:00","end":"20:15","genre":["Alternative","Indie"],"type":"band"},{"id":"r208","band":"Ken Carson","day":"Thursday","stage":"Arena","start":"21:00","end":"22:15","genre":["Hip-Hop","Trap"],"type":"band"},{"id":"r209","band":"Kneecap","day":"Thursday","stage":"Arena","start":"00:00","end":"01:00","genre":["Punk","Hip-Hop"],"type":"band"},{"id":"r210","band":"Brutalismus 3000","day":"Thursday","stage":"Arena","start":"02:00","end":"03:00","genre":["Techno"],"type":"band"},{"id":"r211","band":"SOLI CITY x VERTIGO","day":"Thursday","stage":"Gloria","start":"13:00","end":"14:00","genre":["Electronic"],"type":"band"},{"id":"r212","band":"Abdullah Miniawy Trio","day":"Thursday","stage":"Gloria","start":"16:30","end":"17:30","genre":["Jazz","Experimental"],"type":"band"},{"id":"r213","band":"The New Eves","day":"Thursday","stage":"Gloria","start":"18:30","end":"19:30","genre":["Folk"],"type":"band"},{"id":"r214","band":"Cortisa Star","day":"Thursday","stage":"Gloria","start":"20:30","end":"21:30","genre":["Hip-Hop"],"type":"band"},{"id":"r215","band":"Krøyer","day":"Thursday","stage":"Gloria","start":"22:15","end":"23:15","genre":["Electronic"],"type":"band"},{"id":"r216","band":"The Zawose Queens","day":"Thursday","stage":"Gloria","start":"00:00","end":"01:00","genre":["World"],"type":"band"},{"id":"r217","band":"Djrum","day":"Thursday","stage":"Gloria","start":"01:45","end":"02:45","genre":["Electronic"],"type":"band"},{"id":"r218","band":"Dean Johnson","day":"Thursday","stage":"Fauna","start":"13:00","end":"14:00","genre":["Folk"],"type":"band"},{"id":"r219","band":"ŠIROM","day":"Thursday","stage":"Fauna","start":"15:00","end":"16:00","genre":["Folk","Experimental"],"type":"band"},{"id":"r220","band":"Yerai Cortés","day":"Thursday","stage":"Fauna","start":"17:00","end":"18:00","genre":["Flamenco"],"type":"band"},{"id":"r221","band":"Truck Violence","day":"Thursday","stage":"Fauna","start":"19:30","end":"20:30","genre":["Rock"],"type":"band"},{"id":"r222","band":"Khana Bierbood","day":"Thursday","stage":"Fauna","start":"21:00","end":"22:00","genre":["Surf Rock"],"type":"band"},{"id":"r223","band":"Nick León","day":"Thursday","stage":"Fauna","start":"23:00","end":"00:00","genre":["Electronic"],"type":"band"},{"id":"r224","band":"Adrian Quesada","day":"Thursday","stage":"Eos","start":"13:00","end":"14:00","genre":["Soul"],"type":"band"},{"id":"r225","band":"Jalen Ngonda","day":"Thursday","stage":"Eos","start":"15:00","end":"16:00","genre":["Soul"],"type":"band"},{"id":"r226","band":"Napalm Death","day":"Thursday","stage":"Eos","start":"17:00","end":"18:00","genre":["Grindcore","Death Metal"],"type":"band"},{"id":"r227","band":"Wicky","day":"Thursday","stage":"Eos","start":"19:00","end":"20:00","genre":["Electronic"],"type":"band"},{"id":"r228","band":"KWN","day":"Thursday","stage":"Eos","start":"21:00","end":"22:00","genre":["Electronic"],"type":"band"},{"id":"r229","band":"Lykke Li","day":"Thursday","stage":"Eos","start":"23:30","end":"00:45","genre":["Indie Pop"],"type":"band"},{"id":"r230","band":"Uld","day":"Thursday","stage":"Lagune","start":"12:00","end":"13:00","genre":["Electronic"],"type":"band"},{"id":"r231","band":"TARRAK","day":"Thursday","stage":"Lagune","start":"14:00","end":"15:00","genre":["Electronic"],"type":"band"},{"id":"r232","band":"BB Trickz","day":"Thursday","stage":"Lagune","start":"16:30","end":"17:30","genre":["Hip-Hop"],"type":"band"},{"id":"r233","band":"Ecca Vandal","day":"Thursday","stage":"Lagune","start":"18:30","end":"19:30","genre":["Punk"],"type":"band"},{"id":"r234","band":"Naïka","day":"Thursday","stage":"Lagune","start":"20:15","end":"21:15","genre":["Pop"],"type":"band"},{"id":"r235","band":"Uncle Acid & The Deadbeats","day":"Thursday","stage":"Lagune","start":"22:15","end":"23:15","genre":["Doom Rock"],"type":"band"},{"id":"r236","band":"Cobrah","day":"Thursday","stage":"Lagune","start":"00:15","end":"01:15","genre":["Electronic"],"type":"band"},{"id":"r237","band":"Honningbarna","day":"Thursday","stage":"Lagune","start":"02:15","end":"03:15","genre":["Punk"],"type":"band"},{"id":"r301","band":"Tessa","day":"Friday","stage":"Orange Scene","start":"16:00","end":"17:00","genre":["Hip-Hop"],"type":"band"},{"id":"r302","band":"Addison Rae","day":"Friday","stage":"Orange Scene","start":"19:00","end":"20:00","genre":["Pop"],"type":"band"},{"id":"r303","band":"Jennie","day":"Friday","stage":"Orange Scene","start":"22:00","end":"23:15","genre":["K-Pop","Pop"],"type":"band"},{"id":"r304","band":"Aphaca","day":"Friday","stage":"Orange Scene","start":"01:00","end":"02:00","genre":["Electronic"],"type":"band"},{"id":"r305","band":"Mille","day":"Friday","stage":"Arena","start":"13:00","end":"14:00","genre":["Pop"],"type":"band"},{"id":"r306","band":"YOUNG MIKO","day":"Friday","stage":"Arena","start":"15:00","end":"16:00","genre":["Trap","Latin"],"type":"band"},{"id":"r307","band":"Sierra Ferrell","day":"Friday","stage":"Arena","start":"17:30","end":"18:30","genre":["Folk","Americana"],"type":"band"},{"id":"r308","band":"David Byrne","day":"Friday","stage":"Arena","start":"20:30","end":"22:00","genre":["Rock","World"],"type":"band"},{"id":"r309","band":"Yung Lean & Bladee","day":"Friday","stage":"Arena","start":"00:15","end":"01:15","genre":["Cloud Rap"],"type":"band"},{"id":"r310","band":"Sammy Virji","day":"Friday","stage":"Arena","start":"02:30","end":"03:30","genre":["UK Garage"],"type":"band"},{"id":"r311","band":"Vanessa Amara","day":"Friday","stage":"Gloria","start":"12:30","end":"13:30","genre":["Ambient"],"type":"band"},{"id":"r312","band":"Gwenifer Raymond","day":"Friday","stage":"Gloria","start":"14:30","end":"15:30","genre":["Folk"],"type":"band"},{"id":"r313","band":"Milkweed","day":"Friday","stage":"Gloria","start":"16:30","end":"17:30","genre":["Folk"],"type":"band"},{"id":"r314","band":"Luisa Almaguer","day":"Friday","stage":"Gloria","start":"18:30","end":"19:30","genre":["Pop"],"type":"band"},{"id":"r315","band":"No Joy","day":"Friday","stage":"Gloria","start":"20:30","end":"21:30","genre":["Shoegaze"],"type":"band"},{"id":"r316","band":"Mark William Lewis","day":"Friday","stage":"Gloria","start":"22:30","end":"23:30","genre":["Folk"],"type":"band"},{"id":"r317","band":"POISON RUÏN","day":"Friday","stage":"Gloria","start":"00:30","end":"01:30","genre":["Punk"],"type":"band"},{"id":"r318","band":"Cat Clyde","day":"Friday","stage":"Fauna","start":"13:00","end":"14:00","genre":["Folk"],"type":"band"},{"id":"r319","band":"Folk Bitch Trio","day":"Friday","stage":"Fauna","start":"15:00","end":"16:00","genre":["Folk"],"type":"band"},{"id":"r320","band":"Maruja","day":"Friday","stage":"Fauna","start":"17:00","end":"18:00","genre":["Post-Punk"],"type":"band"},{"id":"r321","band":"Saad Tiouly","day":"Friday","stage":"Fauna","start":"19:00","end":"20:00","genre":["World"],"type":"band"},{"id":"r322","band":"Lamisi","day":"Friday","stage":"Fauna","start":"21:00","end":"22:00","genre":["World"],"type":"band"},{"id":"r323","band":"Kin'Gongolo Kiniata","day":"Friday","stage":"Fauna","start":"23:00","end":"00:00","genre":["World"],"type":"band"},{"id":"r324","band":"Iglooghost","day":"Friday","stage":"Fauna","start":"01:00","end":"02:00","genre":["Electronic"],"type":"band"},{"id":"r325","band":"AySay","day":"Friday","stage":"Eos","start":"12:00","end":"13:00","genre":["Folk"],"type":"band"},{"id":"r326","band":"The Savage Rose","day":"Friday","stage":"Eos","start":"15:00","end":"16:00","genre":["Rock"],"type":"band"},{"id":"r327","band":"Rizwan-Muazzam Qawwali","day":"Friday","stage":"Eos","start":"18:00","end":"19:00","genre":["Qawwali","World"],"type":"band"},{"id":"r328","band":"DBN Gogo","day":"Friday","stage":"Eos","start":"20:30","end":"21:30","genre":["Amapiano"],"type":"band"},{"id":"r329","band":"Oklou","day":"Friday","stage":"Eos","start":"23:00","end":"00:00","genre":["Pop","Electronic"],"type":"band"},{"id":"r330","band":"Hemlocke Springs","day":"Friday","stage":"Lagune","start":"12:00","end":"13:00","genre":["Pop"],"type":"band"},{"id":"r331","band":"Chezile","day":"Friday","stage":"Lagune","start":"14:00","end":"15:00","genre":["Pop"],"type":"band"},{"id":"r332","band":"Getdown Services","day":"Friday","stage":"Lagune","start":"16:00","end":"17:00","genre":["Post-Punk"],"type":"band"},{"id":"r333","band":"Smerz","day":"Friday","stage":"Lagune","start":"18:00","end":"19:00","genre":["Electronic"],"type":"band"},{"id":"r334","band":"Jim Legxacy","day":"Friday","stage":"Lagune","start":"20:00","end":"21:00","genre":["Alternative"],"type":"band"},{"id":"r335","band":"Los Thuthanaka","day":"Friday","stage":"Lagune","start":"22:00","end":"23:00","genre":["Experimental"],"type":"band"},{"id":"r336","band":"Blawan","day":"Friday","stage":"Lagune","start":"00:00","end":"01:00","genre":["Techno"],"type":"band"},{"id":"r337","band":"Tonser","day":"Friday","stage":"Lagune","start":"02:15","end":"03:15","genre":["Electronic"],"type":"band"},{"id":"r401","band":"TV-2","day":"Saturday","stage":"Orange Scene","start":"15:30","end":"16:30","genre":["Pop Rock"],"type":"band"},{"id":"r402","band":"Clipse","day":"Saturday","stage":"Orange Scene","start":"18:30","end":"19:30","genre":["Hip-Hop","Rap"],"type":"band"},{"id":"r403","band":"Lily Allen","day":"Saturday","stage":"Orange Scene","start":"20:45","end":"21:45","genre":["Pop","Alternative"],"type":"band"},{"id":"r404","band":"Zara Larsson","day":"Saturday","stage":"Orange Scene","start":"23:15","end":"00:30","genre":["Pop"],"type":"band"},{"id":"r405","band":"MAS","day":"Saturday","stage":"Arena","start":"14:30","end":"15:30","genre":["Rock"],"type":"band"},{"id":"r406","band":"Audrey Nuna","day":"Saturday","stage":"Arena","start":"17:15","end":"18:15","genre":["Hip-Hop","Rap"],"type":"band"},{"id":"r407","band":"Liniker","day":"Saturday","stage":"Arena","start":"19:30","end":"20:30","genre":["Soul","MPB"],"type":"band"},{"id":"r408","band":"Bad Gyal","day":"Saturday","stage":"Arena","start":"22:00","end":"23:00","genre":["Trap","Reggaeton"],"type":"band"},{"id":"r409","band":"Zar Paulo","day":"Saturday","stage":"Arena","start":"00:45","end":"01:45","genre":["Electronic"],"type":"band"},{"id":"r410","band":"Madra Salach","day":"Saturday","stage":"Gloria","start":"12:30","end":"13:30","genre":["World"],"type":"band"},{"id":"r411","band":"Heinali & Andriana-Yaroslava Saienko","day":"Saturday","stage":"Gloria","start":"14:30","end":"15:30","genre":["Ambient"],"type":"band"},{"id":"r412","band":"CUIRASS","day":"Saturday","stage":"Gloria","start":"16:30","end":"17:30","genre":["Electronic"],"type":"band"},{"id":"r413","band":"Bruno Berle","day":"Saturday","stage":"Gloria","start":"18:30","end":"19:30","genre":["Pop"],"type":"band"},{"id":"r414","band":"1111","day":"Saturday","stage":"Gloria","start":"20:30","end":"21:30","genre":["Electronic"],"type":"band"},{"id":"r415","band":"Ata Kak","day":"Saturday","stage":"Gloria","start":"22:30","end":"23:30","genre":["Highlife"],"type":"band"},{"id":"r416","band":"Lord Snow","day":"Saturday","stage":"Gloria","start":"00:30","end":"01:30","genre":["Electronic"],"type":"band"},{"id":"r417","band":"Midori Takada & Jakob Bro","day":"Saturday","stage":"Fauna","start":"12:30","end":"13:30","genre":["Jazz","Ambient"],"type":"band"},{"id":"r418","band":"Sara Parkman","day":"Saturday","stage":"Fauna","start":"14:30","end":"15:30","genre":["Folk"],"type":"band"},{"id":"r419","band":"Jorjiana","day":"Saturday","stage":"Fauna","start":"16:30","end":"17:30","genre":["Pop"],"type":"band"},{"id":"r420","band":"The Callous Daoboys","day":"Saturday","stage":"Fauna","start":"18:15","end":"19:15","genre":["Mathcore"],"type":"band"},{"id":"r421","band":"Albertslund Terror Korps","day":"Saturday","stage":"Fauna","start":"21:00","end":"22:00","genre":["Hardcore"],"type":"band"},{"id":"r422","band":"Sorry","day":"Saturday","stage":"Fauna","start":"23:15","end":"00:15","genre":["Indie"],"type":"band"},{"id":"r423","band":"CRRDR","day":"Saturday","stage":"Fauna","start":"01:15","end":"02:15","genre":["Electronic"],"type":"band"},{"id":"r424","band":"Lojay","day":"Saturday","stage":"Eos","start":"14:00","end":"15:00","genre":["Afrobeats"],"type":"band"},{"id":"r425","band":"Los Mirlos","day":"Saturday","stage":"Eos","start":"17:00","end":"18:00","genre":["Cumbia"],"type":"band"},{"id":"r426","band":"Frost Children","day":"Saturday","stage":"Eos","start":"19:45","end":"20:45","genre":["Hyperpop"],"type":"band"},{"id":"r427","band":"Panda Bear & Sonic Boom","day":"Saturday","stage":"Eos","start":"22:00","end":"23:00","genre":["Psychedelic"],"type":"band"},{"id":"r428","band":"Kettama","day":"Saturday","stage":"Eos","start":"02:00","end":"03:00","genre":["House"],"type":"band"},{"id":"r429","band":"Snuggle","day":"Saturday","stage":"Lagune","start":"12:00","end":"13:00","genre":["Pop"],"type":"band"},{"id":"r430","band":"EEE GEE","day":"Saturday","stage":"Lagune","start":"14:30","end":"15:30","genre":["Pop"],"type":"band"},{"id":"r431","band":"Nourished By Time","day":"Saturday","stage":"Lagune","start":"17:00","end":"18:00","genre":["R&B","Electronic"],"type":"band"},{"id":"r432","band":"Igorrr","day":"Saturday","stage":"Lagune","start":"19:30","end":"20:30","genre":["Experimental Metal"],"type":"band"},{"id":"r433","band":"Jane Remover","day":"Saturday","stage":"Lagune","start":"22:00","end":"23:00","genre":["Hyperpop"],"type":"band"},{"id":"r434","band":"Rochelle Jordan","day":"Saturday","stage":"Lagune","start":"00:00","end":"01:00","genre":["R&B","Electronic"],"type":"band"}];
 
     // Bygger `schedule` (dag -> scene -> oppføringer), `bandGenres` og
     // `actType` fra den flate lista appen henter fra /api/lineup.
@@ -622,8 +506,8 @@
     }
 
     let selectedDay = 0, selectedStage = null, selectedGenre = null;
-    const stageMap = { 'Orange Scene': 'scream', 'Arena': 'vampire', 'Lagune': 'moonlight', 'The Yard': 'storm', 'Stadion': 'scream', 'Dancefloor': 'vampire', 'Skate': 'moonlight', 'Re:Act': 'storm', 'Grow': 'scream', 'Cinema': 'vampire', 'Rehearsals of Belonging': 'moonlight', 'Eos': 'storm' };
-    const stageShort = { 'Orange Scene': 'Orange', 'Arena': 'Arena', 'Lagune': 'Lagune', 'The Yard': 'Yard', 'Stadion': 'Stadion', 'Dancefloor': 'Dance', 'Skate': 'Skate', 'Re:Act': 'React', 'Grow': 'Grow', 'Cinema': 'Cinema', 'Rehearsals of Belonging': 'Rehearsal', 'Eos': 'Eos' };
+    const stageMap = { 'Orange Scene': 'scream', 'Arena': 'vampire', 'Lagune': 'moonlight', 'Gloria': 'storm', 'Fauna': 'scream', 'The Yard': 'storm', 'Stadion': 'scream', 'Dancefloor': 'vampire', 'Skate': 'moonlight', 'Re:Act': 'storm', 'Grow': 'scream', 'Cinema': 'vampire', 'Rehearsals of Belonging': 'moonlight', 'Eos': 'storm' };
+    const stageShort = { 'Orange Scene': 'Orange', 'Arena': 'Arena', 'Lagune': 'Lagune', 'Gloria': 'Gloria', 'Fauna': 'Fauna', 'The Yard': 'Yard', 'Stadion': 'Stadion', 'Dancefloor': 'Dance', 'Skate': 'Skate', 'Re:Act': 'React', 'Grow': 'Grow', 'Cinema': 'Cinema', 'Rehearsals of Belonging': 'Rehearsal', 'Eos': 'Eos' };
 
     // ============================================================
     // LAST.FM API — lim inn din gratis API-nøkkel her:
@@ -632,11 +516,11 @@
     // ============================================================
 
     // Klassifisering: oppføringer som IKKE er musikkband.
-    // 'event' = fotball/quiz, 'annet' = standup/karaoke/silent disco (Storm Stage).
+    // 'art' = kunst/aktivisme, 'activity' = workshop/yoga/skate, 'film' = Cinema, 'event' = annet.
     // Bygges nå dynamisk fra programmet (se rebuildScheduleFromFlat) i stedet
     // for en hardkodet liste, slik at admin kan endre type per oppføring.
     let actType = {};
-    // Returnerer 'band' (default), 'event' eller 'annet'
+    // Returnerer 'band' (default), 'art', 'activity', 'film' eller 'event'
     function getActType(name) { return actType[name] || 'band'; }
 
     // ===== FAVORITTER — sky-sync med localStorage som fallback =====
@@ -672,11 +556,11 @@
 
     // Lokal lagring (fallback + cache)
     function loadLocalFavorites() {
-      try { return new Set(JSON.parse(localStorage.getItem('tor_favorites') || '[]')); }
+      try { return new Set(JSON.parse(localStorage.getItem('rf_favorites') || '[]')); }
       catch (e) { return new Set(); }
     }
     function saveLocalFavorites(set) {
-      try { localStorage.setItem('tor_favorites', JSON.stringify([...set])); }
+      try { localStorage.setItem('rf_favorites', JSON.stringify([...set])); }
       catch (e) { /* utilgjengelig */ }
     }
     let favorites = loadLocalFavorites();
@@ -749,10 +633,10 @@
 
     // ---- Brukernavn-håndtering ----
     function getStoredUser() {
-      try { return localStorage.getItem('tor_user'); } catch (e) { return null; }
+      try { return localStorage.getItem('rf_user'); } catch (e) { return null; }
     }
     function setStoredUser(name) {
-      try { if (name) localStorage.setItem('tor_user', name); else localStorage.removeItem('tor_user'); }
+      try { if (name) localStorage.setItem('rf_user', name); else localStorage.removeItem('rf_user'); }
       catch (e) {}
     }
 
@@ -791,26 +675,20 @@
     }
 
 
-    // Auto-detect current day - festival is June 24-27, 2026
+    // Auto-detect current day - festival is June 28 - July 4, 2026
     function getDefaultDay() {
       const now = new Date();
-      const year = now.getFullYear();
-      const month = now.getMonth();
-      const day = now.getDate();
-      
-      // Festival dates
-      const festivalStart = new Date(2026, 5, 24); // June 24, 2026
-      const festivalEnd = new Date(2026, 5, 27);   // June 27, 2026
-      
+
+      // Festival dates: Sunday June 28 (index 0) ... Saturday July 4 (index 6)
+      const festivalStart = new Date(2026, 5, 28); // June 28, 2026
+      const festivalEnd = new Date(2026, 6, 4, 23, 59); // July 4, 2026
+
       if (now >= festivalStart && now <= festivalEnd) {
-        const dayOfWeek = now.getDay();
-        // 0=Sunday, 3=Wednesday (June 24), 4=Thursday, 5=Friday, 6=Saturday
-        if (dayOfWeek === 3) return 0; // Wednesday
-        if (dayOfWeek === 4) return 1; // Thursday
-        if (dayOfWeek === 5) return 2; // Friday
-        if (dayOfWeek === 6) return 3; // Saturday
+        // Dag-rekkefølge i appen: Sun, Mon, Tue, Wed, Thu, Fri, Sat
+        const dayOfWeek = now.getDay(); // 0=Sun ... 6=Sat
+        return dayOfWeek; // matcher DAY_ORDER-indeksene direkte
       }
-      return 0; // Default to Wednesday
+      return 0; // Default to Sunday (første festivaldag)
     }
 
     selectedDay = getDefaultDay();
@@ -873,7 +751,7 @@
       showModal(bandName, tracks.length > 0 ? 'Popular Tracks' : 'Listen on Spotify', `<div class="tracks-section">${tracksHtml}</div>`);
     }
 
-    const stageIcon = { 'Scream Stage': '🔴', 'Vampire Stage': '🟣', 'Moonlight Stage': '🔵', 'The Storm Stage': '⚪' };
+    const stageIcon = { 'Orange Scene': '🟠', 'Arena': '🔵', 'Lagune': '🟣', 'Gloria': '🟤', 'Fauna': '🟢', 'The Yard': '🟢', 'Stadion': '🔴', 'Dancefloor': '🟡', 'Skate': '⚫', 'Re:Act': '🟤', 'Grow': '🌱', 'Cinema': '🎬', 'Rehearsals of Belonging': '🎭', 'Eos': '⚪' };
 
     function render() {
       const dayButtons = document.getElementById('dayButtons');
@@ -884,7 +762,7 @@
 
       const stageButtons = document.getElementById('stageButtons');
       const stages = Object.keys(schedule[selectedDay].stages);
-      const segMap = { 'Scream Stage': 'seg-scream', 'Vampire Stage': 'seg-vampire', 'Moonlight Stage': 'seg-moonlight', 'The Storm Stage': 'seg-storm' };
+      const segMap = { 'Orange Scene': 'seg-scream', 'Arena': 'seg-vampire', 'Lagune': 'seg-moonlight', 'Gloria': 'seg-storm', 'Fauna': 'seg-scream', 'The Yard': 'seg-storm', 'Stadion': 'seg-scream', 'Dancefloor': 'seg-vampire', 'Skate': 'seg-moonlight', 'Re:Act': 'seg-storm', 'Grow': 'seg-scream', 'Cinema': 'seg-vampire', 'Rehearsals of Belonging': 'seg-moonlight', 'Eos': 'seg-storm' };
       const favRow = `<div class="fav-row"><button class="btn-fav ${showFavoritesOnly ? 'active' : ''}">⭐ Mine favoritter <span class="fav-count">(${favorites.size})</span></button></div>`;
       const segmented = `<div class="segmented">` +
         `<button class="seg-all ${selectedStage === null && !showFavoritesOnly ? 'active' : ''}">Alle</button>` +
@@ -940,8 +818,15 @@
         const stageTag = `<span class="stage-tag ${stageMap[p.stage] || 'storm'}">${stageShort[p.stage] || p.stage}</span>`;
 
         if (type !== 'band') {
-          const icon = type === 'event' ? '⚽' : '🎤';
-          const label = type === 'event' ? 'Storskjerm-event' : 'Standup / scene';
+          const typeMeta = {
+            art: { icon: '🎨', label: 'Kunst & aktivisme' },
+            activity: { icon: '🎪', label: 'Aktivitet' },
+            film: { icon: '🎬', label: 'Film' },
+            event: { icon: '✨', label: 'Event' }
+          };
+          const meta = typeMeta[type] || { icon: '🎤', label: 'Scene' };
+          const icon = meta.icon;
+          const label = meta.label;
           return `<div class="performance stage-${stageMap[p.stage] || 'storm'}"><div class="performance-info"><div class="band-line">${starBtn}<div class="band-text"><div class="performance-band">${icon} ${p.band}</div><div class="performance-genres">${label}</div><div class="performance-meta">${stageTag}<span class="time-badge">${p.start} – ${p.end}</span>${dayTag}</div></div></div></div></div>`;
         }
 
@@ -1513,7 +1398,7 @@
       const content = modal.querySelector('.modal-content');
       const listEl = content.querySelector('#lineupEditList');
       const f = (filter || '').toLowerCase();
-      const dotClass = { 'Scream Stage': 'dot-scream', 'Vampire Stage': 'dot-vampire', 'Moonlight Stage': 'dot-moonlight', 'The Storm Stage': 'dot-storm' };
+      const dotClass = { 'Orange Scene': 'dot-scream', 'Arena': 'dot-vampire', 'Lagune': 'dot-moonlight', 'Gloria': 'dot-storm', 'Fauna': 'dot-scream', 'The Yard': 'dot-storm', 'Stadion': 'dot-scream', 'Dancefloor': 'dot-vampire', 'Skate': 'dot-moonlight', 'Re:Act': 'dot-storm', 'Grow': 'dot-scream', 'Cinema': 'dot-vampire', 'Rehearsals of Belonging': 'dot-moonlight', 'Eos': 'dot-storm' };
       const shown = currentFlatLineup
         .filter(p => p.band.toLowerCase().includes(f))
         .sort((a, b) => DAY_ORDER.indexOf(a.day) - DAY_ORDER.indexOf(b.day) || a.start.localeCompare(b.start));
@@ -1562,8 +1447,8 @@
     function openLineupEditForm(modal, password, id) {
       const isNew = !id;
       const existing = isNew ? null : currentFlatLineup.find(p => p.id === id);
-      const p = existing || { id: null, band: '', day: 'Wednesday', stage: 'Scream Stage', start: '', end: '', genre: [], type: 'band' };
-      const typeLabels = { band: 'Band', annet: 'Standup', event: 'Fotballkamp' };
+      const p = existing || { id: null, band: '', day: 'Sunday', stage: 'Orange Scene', start: '', end: '', genre: [], type: 'band' };
+      const typeLabels = { band: 'Musikk', art: 'Kunst & aktivisme', activity: 'Aktivitet', film: 'Film', event: 'Event' };
 
       const overlay = document.createElement('div');
       overlay.className = 'lineup-edit-overlay';
@@ -1572,7 +1457,7 @@
           <h3>${isNew ? '+ Legg til nytt band' : '✏️ Rediger ' + p.band}</h3>
           <div class="lf-field">
             <label>Bandnavn</label>
-            <input type="text" id="lf-band" value="${p.band}" placeholder="f.eks. Iron Maiden">
+            <input type="text" id="lf-band" value="${p.band}" placeholder="f.eks. The Cure">
           </div>
           <div class="lf-row">
             <div class="lf-field">

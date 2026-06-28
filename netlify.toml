@@ -1,4 +1,4 @@
-# Netlify-konfigurasjon for Tons of Rock flerbrukerversjon
+# Netlify-konfigurasjon for Roskilde 2026-appen
 
 [build]
   publish = "."
