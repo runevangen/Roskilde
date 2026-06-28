@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Roskilde 2026 Festival App</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif; }
+        .lucide { width: 20px; height: 20px; }
+    </style>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel">
+const { useState, useEffect } = React;
+
+// Initial seed data from Clashfinder
+const INITIAL_LINEUP = {
+  'Wednesday 1st July': {
+    'Orange Scene': [
+      { id: '1', time: '17:30', artist: 'Pil' },
+      { id: '2', time: '19:30', artist: 'Wolf Alice' },
+      { id: '3', time: '22:00', artist: 'The Cure' }
+    ],
+    'Arena': [
+      { id: '4', time: '18:30', artist: 'Pa Salieu' },
+      { id: '5', time: '20:45', artist: 'Jade' },
+      { id: '6', time: '00:00', artist: 'EsDeeKid' }
+    ]
+  },
+  'Thursday 2nd July': {
+    'Orange Scene': [
+      { id: '7', time: '16:00', artist: 'Malk De Koijn' },
+      { id: '8', time: '18:00', artist: 'Little Simz' },
+      { id: '9', time: '22:00', artist: 'Gorillaz' }
+    ],
+    'Arena': [
+      { id: '10', time: '14:30', artist: 'Guldimund' },
+      { id: '11', time: '17:00', artist: 'Royel Otis' },
+      { id: '12', time: '19:00', artist: 'Ethel Cain' },
+      { id: '13', time: '21:00', artist: 'Ken Carson' }
+    ]
+  },
+  'Friday 3rd July': {
+    'Orange Scene': [
+      { id: '14', time: '16:00', artist: 'Tessa' },
+      { id: '15', time: '19:00', artist: 'Addison Rae' },
+      { id: '16', time: '22:00', artist: 'Jennie' }
+    ],
+    'Arena': [
+      { id: '17', time: '13:00', artist: 'Mille' },
+      { id: '18', time: '15:00', artist: 'YOUNG MIKO' },
+      { id: '19', time: '20:30', artist: 'David Byrne' }
+    ]
+  },
+  'Saturday 4th July': {
+    'Orange Scene': [
+      { id: '20', time: '15:30', artist: 'TV-2' },
+      { id: '21', time: '18:30', artist: 'Clipse' },
+      { id: '22', time: '20:45', artist: 'Lily Allen' },
+      { id: '23', time: '23:15', artist: 'Zara Larsson' }
+    ],
+    'Arena': [
+      { id: '24', time: '14:30', artist: 'MAS' },
+      { id: '25', time: '17:15', artist: 'Audrey Nuna' },
+      { id: '26', time: '19:30', artist: 'Liniker' },
+      { id: '27', time: '22:00', artist: 'Bad Gyal' }
+    ]
+  }
+};
+
+const App = () => {
+  const [username, setUsername] = useState('');
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isDark, setIsDark] = useState(true);
+  const [textSize, setTextSize] = useState(1);
+  const [favorites, setFavorites] = useState([]);
+  const [meetHere, setMeetHere] = useState([]);
+  const [selectedDay, setSelectedDay] = useState('Saturday 4th July');
+  const [viewMode, setViewMode] = useState('schedule');
+  const [adminPassword, setAdminPassword] = useState('');
+  const [adminLogged, setAdminLogged] = useState(false);
+  const [lineup, setLineup] = useState(INITIAL_LINEUP);
+  const [editingShow, setEditingShow] = useState(null);
+  const [friends] = useState(['Sirild', 'Alma']);
+  const [version] = useState('2.0.0-beta');
+
+  // Simulate Netlify Blobs load
+  useEffect(() => {
+    const saved = localStorage.getItem('roskilde-favorites-' + username);
+    if (saved) {
+      setFavorites(JSON.parse(saved));
+    }
+  }, [username]);
+
+  // Save favorites to "Blobs" (simulated with localStorage)
+  useEffect(() => {
+    if (username && isLoggedIn) {
+      localStorage.setItem('roskilde-favorites-' + username, JSON.stringify(favorites));
+    }
+  }, [favorites, username, isLoggedIn]);
+
+  const handleLogin = (e) => {
+    e.preventDefault();
+    if (username.trim()) {
+      setIsLoggedIn(true);
+    }
+  };
+
+  const handleAdminLogin = (e) => {
+    e.preventDefault();
+    if (adminPassword === 'rock') {
+      setAdminLogged(true);
+      setAdminPassword('');
+    } else {
+      alert('Wrong password');
+    }
+  };
+
+  const toggleFavorite = (artist) => {
+    setFavorites(prev => 
+      prev.includes(artist) 
+        ? prev.filter(a => a !== artist)
+        : [...prev, artist]
+    );
+  };
+
+  const toggleMeetHere = (artist) => {
+    setMeetHere(prev =>
+      prev.includes(artist)
+        ? prev.filter(a => a !== artist)
+        : [...prev, artist]
+    );
+  };
+
+  const updateShow = (day, stage, showId, updates) => {
+    setLineup(prev => ({
+      ...prev,
+      [day]: {
+        ...prev[day],
+        [stage]: prev[day][stage].map(show =>
+          show.id === showId ? { ...show, ...updates } : show
+        )
+      }
+    }));
+  };
+
+  const deleteShow = (day, stage, showId) => {
+    setLineup(prev => ({
+      ...prev,
+      [day]: {
+        ...prev[day],
+        [stage]: prev[day][stage].filter(show => show.id !== showId)
+      }
+    }));
+  };
+
+  const addShow = (day, stage) => {
+    const newId = Date.now().toString();
+    setLineup(prev => ({
+      ...prev,
+      [day]: {
+        ...prev[day],
+        [stage]: [...(prev[day][stage] || []), { id: newId, time: '20:00', artist: 'New Artist' }]
+      }
+    }));
+  };
+
+  if (!isLoggedIn) {
+    return (
+      <div className={`min-h-screen flex items-center justify-center ${isDark ? 'bg-gray-900' : 'bg-gray-100'}`}>
+        <div className={`p-8 rounded-lg ${isDark ? 'bg-gray-800' : 'bg-white'} shadow-xl max-w-md w-full mx-4`}>
+          <h1 className={`text-4xl font-bold mb-8 text-center ${isDark ? 'text-orange-400' : 'text-orange-600'}`}>
+            ROSKILDE 2026
+          </h1>
+          <form onSubmit={handleLogin}>
+            <input
+              type="text"
+              placeholder="Enter your name..."
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              className={`w-full p-3 rounded border-2 ${isDark ? 'bg-gray-700 border-gray-600 text-white' : 'bg-gray-100 border-gray-300'} mb-4`}
+              style={{ fontSize: `${16 * textSize}px` }}
+            />
+            <button
+              type="submit"
+              className="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded"
+            >
+              Enter Festival
+            </button>
+          </form>
+        </div>
+      </div>
+    );
+  }
+
+  const days = Object.keys(lineup);
+  const currentLineup = lineup[selectedDay] || {};
+
+  return (
+    <div className={`min-h-screen ${isDark ? 'bg-gray-900 text-white' : 'bg-gray-50 text-gray-900'}`} style={{ fontSize: `${14 * textSize}px` }}>
+      {/* Header */}
+      <header className={`${isDark ? 'bg-gray-800' : 'bg-white'} border-b-2 border-orange-600 p-4 sticky top-0 z-50`}>
+        <div className="max-w-7xl mx-auto flex justify-between items-center flex-wrap gap-4">
+          <div>
+            <h1 className="text-2xl font-bold text-orange-500">ROSKILDE 2026</h1>
+            <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>27.06 - 04.07 • {username}</p>
+          </div>
+          
+          <div className="flex gap-2 items-center flex-wrap">
+            {/* Text Size */}
+            <div className="flex gap-1">
+              {[0.85, 1, 1.15].map((size, i) => (
+                <button
+                  key={i}
+                  onClick={() => setTextSize(size)}
+                  className={`w-8 h-8 rounded font-bold text-xs ${textSize === size ? 'bg-orange-600 text-white' : isDark ? 'bg-gray-700' : 'bg-gray-200'}`}
+                >
+                  {['S', 'M', 'L'][i]}
+                </button>
+              ))}
+            </div>
+
+            {/* Theme */}
+            <button
+              onClick={() => setIsDark(!isDark)}
+              className={`p-2 rounded ${isDark ? 'bg-gray-700' : 'bg-gray-200'}`}
+            >
+              {isDark ? '☀️' : '🌙'}
+            </button>
+
+            {/* Logout */}
+            <button
+              onClick={() => {
+                setIsLoggedIn(false);
+                setUsername('');
+                setAdminLogged(false);
+              }}
+              className="p-2 rounded bg-red-600 hover:bg-red-700 text-white"
+              title="Logout"
+            >
+              ⬅️
+            </button>
+          </div>
+        </div>
+      </header>
+
+      {/* View Tabs */}
+      <div className={`${isDark ? 'bg-gray-800' : 'bg-white'} border-b border-gray-700 p-4 sticky top-16 z-40`}>
+        <div className="max-w-7xl mx-auto flex gap-2 flex-wrap">
+          {['schedule', 'map', 'admin'].map(mode => (
+            <button
+              key={mode}
+              onClick={() => setViewMode(mode)}
+              className={`px-4 py-2 rounded font-bold capitalize ${viewMode === mode ? 'bg-orange-600 text-white' : isDark ? 'bg-gray-700' : 'bg-gray-200'}`}
+            >
+              {mode === 'map' ? '🗺️ Arena' : mode === 'admin' ? '⚙️ Admin' : '📋 Schedule'}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <main className="max-w-7xl mx-auto p-4">
+        {viewMode === 'schedule' && (
+          <>
+            {/* Day Selection */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-6">
+              {days.map(day => (
+                <button
+                  key={day}
+                  onClick={() => setSelectedDay(day)}
+                  className={`p-3 rounded font-bold transition ${
+                    selectedDay === day
+                      ? 'bg-orange-600 text-white'
+                      : isDark ? 'bg-gray-800 hover:bg-gray-700' : 'bg-white hover:bg-gray-100'
+                  }`}
+                >
+                  {day.split(' ')[0]}
+                </button>
+              ))}
+            </div>
+
+            {/* Schedule */}
+            <div className="grid gap-6">
+              {Object.entries(currentLineup).map(([stage, shows]) => (
+                <div key={stage} className={`${isDark ? 'bg-gray-800' : 'bg-white'} rounded-lg p-6 border-2 border-orange-600`}>
+                  <h2 className="text-xl font-bold text-orange-500 mb-4">{stage}</h2>
+                  
+                  <div className="grid gap-3">
+                    {shows.map((show) => (
+                      <div
+                        key={show.id}
+                        className={`p-3 rounded border-l-4 border-orange-500 transition ${
+                          favorites.includes(show.artist)
+                            ? isDark ? 'bg-orange-900 bg-opacity-50' : 'bg-orange-100'
+                            : isDark ? 'bg-gray-700' : 'bg-gray-100'
+                        }`}
+                      >
+                        <div className="flex justify-between items-center flex-wrap gap-2">
+                          <div>
+                            <div className="font-bold text-lg">{show.artist}</div>
+                            <div className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                              {show.time} • {stage}
+                            </div>
+                          </div>
+
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => toggleFavorite(show.artist)}
+                              className={`px-3 py-1 rounded font-bold transition ${
+                                favorites.includes(show.artist)
+                                  ? 'bg-orange-600 text-white'
+                                  : isDark ? 'bg-gray-600' : 'bg-gray-300'
+                              }`}
+                            >
+                              ★
+                            </button>
+
+                            <button
+                              onClick={() => toggleMeetHere(show.artist)}
+                              className={`px-3 py-1 rounded font-bold transition ${
+                                meetHere.includes(show.artist)
+                                  ? 'bg-green-600 text-white'
+                                  : isDark ? 'bg-gray-600' : 'bg-gray-300'
+                              }`}
+                              title="Møt meg her"
+                            >
+                              📍
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Favorites Sidebar */}
+            <div className="mt-8 grid md:grid-cols-2 gap-6">
+              <div className={`${isDark ? 'bg-gray-800' : 'bg-white'} rounded-lg p-6`}>
+                <h3 className="text-lg font-bold mb-3">👥 Vennegjengen</h3>
+                <div className="flex flex-wrap gap-2">
+                  {friends.map(friend => (
+                    <div key={friend} className="bg-blue-600 text-white px-3 py-1 rounded-full font-bold">
+                      {friend}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className={`${isDark ? 'bg-gray-800' : 'bg-white'} rounded-lg p-6`}>
+                <h3 className="text-lg font-bold mb-3">★ Mine favoritter ({favorites.length})</h3>
+                <div className="flex flex-wrap gap-2">
+                  {favorites.slice(0, 8).map(fav => (
+                    <div key={fav} className="bg-orange-600 text-white px-3 py-1 rounded-full text-sm font-bold">
+                      {fav}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </>
+        )}
+
+        {viewMode === 'map' && (
+          <div className={`${isDark ? 'bg-gray-800' : 'bg-white'} rounded-lg p-8`}>
+            <h2 className="text-2xl font-bold mb-6">🗺️ Arena Map</h2>
+            <div className={`${isDark ? 'bg-gray-700' : 'bg-gray-200'} p-8 rounded-lg text-center`}>
+              <p className="text-xl mb-4">Roskilde Festival Arena Layout</p>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-6">
+                {['Orange Scene', 'Arena', 'Gloria', 'Fauna', 'Lagune', 'Platform'].map(stage => (
+                  <div key={stage} className={`${isDark ? 'bg-gray-800' : 'bg-white'} p-4 rounded border-2 border-orange-600`}>
+                    <p className="font-bold text-orange-500">{stage}</p>
+                    <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                      {Object.values(currentLineup).flat().filter(s => s.artist).length} shows today
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {viewMode === 'admin' && (
+          <div className={`${isDark ? 'bg-gray-800' : 'bg-white'} rounded-lg p-6`}>
+            {!adminLogged ? (
+              <form onSubmit={handleAdminLogin} className="max-w-md">
+                <h2 className="text-2xl font-bold mb-4">⚙️ Admin Panel</h2>
+                <input
+                  type="password"
+                  placeholder="Admin password"
+                  value={adminPassword}
+                  onChange={(e) => setAdminPassword(e.target.value)}
+                  className={`w-full p-3 rounded border-2 ${isDark ? 'bg-gray-700 border-gray-600 text-white' : 'bg-gray-100 border-gray-300'} mb-4`}
+                />
+                <button
+                  type="submit"
+                  className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
+                >
+                  Login
+                </button>
+              </form>
+            ) : (
+              <div>
+                <h2 className="text-2xl font-bold mb-6">📊 Admin Control Panel</h2>
+                
+                {/* Edit Mode */}
+                <div className="mb-8">
+                  <h3 className="text-xl font-bold mb-4">Edit Lineup</h3>
+                  
+                  <div className="grid gap-6">
+                    {Object.entries(lineup).map(([day, stages]) => (
+                      <div key={day} className={`${isDark ? 'bg-gray-700' : 'bg-gray-100'} p-4 rounded`}>
+                        <h4 className="font-bold text-orange-500 mb-3">{day}</h4>
+                        
+                        {Object.entries(stages).map(([stage, shows]) => (
+                          <div key={stage} className="ml-4 mb-4">
+                            <p className="font-bold mb-2">{stage}</p>
+                            
+                            {shows.map((show) => (
+                              <div key={show.id} className={`flex gap-2 mb-2 ${isDark ? 'bg-gray-600' : 'bg-white'} p-2 rounded`}>
+                                <input
+                                  type="text"
+                                  value={show.time}
+                                  onChange={(e) => updateShow(day, stage, show.id, { time: e.target.value })}
+                                  placeholder="Time"
+                                  className="w-20 p-1 rounded text-sm"
+                                />
+                                <input
+                                  type="text"
+                                  value={show.artist}
+                                  onChange={(e) => updateShow(day, stage, show.id, { artist: e.target.value })}
+                                  placeholder="Artist"
+                                  className="flex-1 p-1 rounded text-sm"
+                                />
+                                <button
+                                  onClick={() => deleteShow(day, stage, show.id)}
+                                  className="bg-red-600 text-white px-2 py-1 rounded text-sm"
+                                >
+                                  ✕
+                                </button>
+                              </div>
+                            ))}
+                            
+                            <button
+                              onClick={() => addShow(day, stage)}
+                              className="bg-green-600 text-white px-2 py-1 rounded text-sm mt-2"
+                            >
+                              + Add Show
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Stats */}
+                <div className={`${isDark ? 'bg-gray-700' : 'bg-gray-100'} p-4 rounded mb-4`}>
+                  <p className="text-sm mb-2">📈 Total shows: {Object.values(lineup).flatMap(s => Object.values(s).flat()).length}</p>
+                  <p className="text-sm mb-2">🎭 Scenes: {Object.values(lineup).flatMap(s => Object.keys(s)).filter((v, i, a) => a.indexOf(v) === i).length}</p>
+                  <p className="text-sm">📅 Days: {Object.keys(lineup).length}</p>
+                </div>
+
+                <button
+                  onClick={() => setAdminLogged(false)}
+                  className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
+                >
+                  Logout
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+      </main>
+
+      {/* Footer */}
+      <footer className={`${isDark ? 'bg-gray-800' : 'bg-white'} border-t border-gray-700 p-4 mt-12 text-center`}>
+        <p className={isDark ? 'text-gray-400' : 'text-gray-600'}>
+          Roskilde 2026 App • v{version} • Made with ❤️
+        </p>
+      </footer>
+    </div>
+  );
+};
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>
